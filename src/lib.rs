@@ -359,7 +359,8 @@ pub trait uDisplayFloat {
 #[allow(non_camel_case_types)]
 pub trait uDisplayWithPadding {
     /// Formats the value using the given formatter
-    fn fmt_padding<W>(&self, _: &mut Formatter<'_, W>, pad_length: usize, left_aligned: bool) -> Result<(), W::Error>
+    /// left_aligned: 0: left, 1: right, 2: text left, numbers right
+    fn fmt_padding<W>(&self, _: &mut Formatter<'_, W>, pad_length: usize, left_aligned: u8) -> Result<(), W::Error>
     where
         W: uWrite + ?Sized;
 }

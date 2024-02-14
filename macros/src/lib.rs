@@ -349,7 +349,7 @@ enum Piece<'a> {
     },
     Padding {
         pad_length: usize,
-        left_aligned: bool,
+        left_aligned: u8,
     }
 }
 
@@ -500,11 +500,11 @@ fn parse_colon(format: &str, span: Span) -> parse::Result<(Piece, &str)> {
         (ch, false)
     };
     let (ch, left_aligned) = if ch == '<' || ch == '>' {
-        let left_aligned = if ch == '<' {true} else {false};
+        let left_aligned = if ch == '<' {0_u8} else {1_u8};
         let ch = chars.next().ok_or(err_piece())?;
         (ch, left_aligned)
     } else {
-        (ch, false)
+        (ch, 2_u8)
     };
     let (mut ch, pad_char) = if ch == '0' {
         let ch = chars.next().ok_or(err_piece())?;
@@ -689,15 +689,7 @@ mod tests {
             super::parse("{:<27}", span).ok(),
             Some(vec![Piece::Padding { 
                 pad_length: 27, 
-                left_aligned: true
-            }]),
-        );
-
-        assert_eq!(
-            super::parse("{:27}", span).ok(),
-            Some(vec![Piece::Padding { 
-                pad_length: 27, 
-                left_aligned: false
+                left_aligned: 0
             }]),
         );
 
@@ -705,7 +697,15 @@ mod tests {
             super::parse("{:>27}", span).ok(),
             Some(vec![Piece::Padding { 
                 pad_length: 27, 
-                left_aligned: false
+                left_aligned: 1
+            }]),
+        );
+
+        assert_eq!(
+            super::parse("{:27}", span).ok(),
+            Some(vec![Piece::Padding { 
+                pad_length: 27, 
+                left_aligned: 2
             }]),
         );
 

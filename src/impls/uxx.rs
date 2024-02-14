@@ -47,13 +47,13 @@ macro_rules! uxx_trait_impl {
                 &self, 
                 fmt: &mut Formatter<'_, W>, 
                 pad_length: usize, 
-                left_aligned: bool
+                left_aligned: u8
             ) -> Result<(), W::Error>
             where
                 W: uWrite + ?Sized 
             {
                 let s = uxx!(*self, $len);
-                if left_aligned {
+                if left_aligned == 0 {
                     fmt.write_str(s)?;
                     for _ in s.len() .. pad_length {
                         fmt.write_char(' ')?;

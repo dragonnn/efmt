@@ -28,7 +28,7 @@ impl uDisplayWithPadding for bool {
         &self, 
         fmt: &mut Formatter<'_, W>, 
         pad_length: usize, 
-        left_aligned: bool
+        left_aligned: u8
     ) -> Result<(), W::Error>
     where
         W: uWrite + ?Sized 
@@ -38,7 +38,7 @@ impl uDisplayWithPadding for bool {
         } else {
             "false"
         };
-        if left_aligned {
+        if left_aligned == 0 || left_aligned == 2 {
             fmt.write_str(s)?;
             for _ in s.len() .. pad_length {
                 fmt.write_char(' ')?;
@@ -95,12 +95,12 @@ impl uDisplayWithPadding for char {
         &self, 
         fmt: &mut Formatter<'_, W>, 
         pad_length: usize, 
-        left_aligned: bool
+        left_aligned: u8
     ) -> Result<(), W::Error>
     where
         W: uWrite + ?Sized 
     {
-        if left_aligned {
+        if left_aligned == 0 || left_aligned == 2 {
             fmt.write_char(*self)?;
             for _ in 1 .. pad_length {
                 fmt.write_char(' ')?;
@@ -163,12 +163,12 @@ impl uDisplayWithPadding for &str {
         &self, 
         fmt: &mut Formatter<'_, W>, 
         pad_length: usize, 
-        left_aligned: bool
+        left_aligned: u8
     ) -> Result<(), W::Error>
     where
         W: uWrite + ?Sized 
     {
-        if left_aligned {
+        if left_aligned == 0 || left_aligned == 2 {
             fmt.write_str(self)?;
             for _ in self.len() .. pad_length {
                 fmt.write_char(' ')?;

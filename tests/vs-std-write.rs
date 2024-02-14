@@ -40,25 +40,16 @@ fn core() {
 
 #[test]
 fn aligned() {
-    assert_eq!(
-        uformat!("{:10}", true),
-        Ok(String::from("      true")) // std::format "true      "
-    );
+    cmp!("{:10}", true);
     cmp!("{:<20}", true);
     cmp!("{:>20}", true);
     cmp!("{:>20}", false);
 
-    assert_eq!(
-        uformat!("{:10}", 'c'),
-        Ok(String::from("         c")) // std::format "c         "
-    );
+    cmp!("{:10}", 'c');
     cmp!("{:<20}", 'c');
     cmp!("{:>20}", 'c');
 
-    assert_eq!(
-        uformat!("{:10}", "hello"),
-        Ok(String::from("     hello")) // std::format "hello     "
-    );
+    cmp!("{:10}", "hello");
     cmp!("{:<20}", "hello");
     cmp!("{:>20}", "hello");
 }
