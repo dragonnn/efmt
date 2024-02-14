@@ -39,6 +39,32 @@ fn core() {
 }
 
 #[test]
+fn aligned() {
+    assert_eq!(
+        uformat!("{:10}", true),
+        Ok(String::from("      true")) // std::format "true      "
+    );
+    cmp!("{:<20}", true);
+    cmp!("{:>20}", true);
+    cmp!("{:>20}", false);
+
+    assert_eq!(
+        uformat!("{:10}", 'c'),
+        Ok(String::from("         c")) // std::format "c         "
+    );
+    cmp!("{:<20}", 'c');
+    cmp!("{:>20}", 'c');
+
+    assert_eq!(
+        uformat!("{:10}", "hello"),
+        Ok(String::from("     hello")) // std::format "hello     "
+    );
+    cmp!("{:<20}", "hello");
+    cmp!("{:>20}", "hello");
+}
+
+
+#[test]
 fn recursion() {
     #[derive(uDebug, Debug)]
     struct Node {
@@ -74,6 +100,27 @@ fn uxx() {
     cmp!("{}", u64::max_value());
     cmp!("{}", u128::max_value());
     cmp!("{}", usize::max_value());
+
+    cmp!("{:10}", 235_u8);
+    cmp!("{:10}", 235_u16);
+    cmp!("{:10}", 235_u32);
+    cmp!("{:10}", 235_u64);
+    cmp!("{:10}", 235_u128);
+    cmp!("{:10}", 235_usize);
+
+    cmp!("{:<10}", 235_u8);
+    cmp!("{:<10}", 235_u16);
+    cmp!("{:<10}", 235_u32);
+    cmp!("{:<10}", 235_u64);
+    cmp!("{:<10}", 235_u128);
+    cmp!("{:<10}", 235_usize);
+
+    cmp!("{:>10}", 235_u8);
+    cmp!("{:>10}", 235_u16);
+    cmp!("{:>10}", 235_u32);
+    cmp!("{:>10}", 235_u64);
+    cmp!("{:>10}", 235_u128);
+    cmp!("{:>10}", 235_usize);
 }
 
 #[test]
@@ -96,6 +143,27 @@ fn ixx() {
     cmp!("{}", i128::max_value());
     cmp!("{}", isize::min_value());
     cmp!("{}", isize::max_value());
+
+    cmp!("{:10}", -115_i8);
+    cmp!("{:10}", -115_i16);
+    cmp!("{:10}", -115_i32);
+    cmp!("{:10}", -115_i64);
+    cmp!("{:10}", -115_i128);
+    cmp!("{:10}", -115_isize);
+
+    cmp!("{:<10}", -115_i8);
+    cmp!("{:<10}", -115_i16);
+    cmp!("{:<10}", -115_i32);
+    cmp!("{:<10}", -115_i64);
+    cmp!("{:<10}", -115_i128);
+    cmp!("{:<10}", -115_isize);
+
+    cmp!("{:>10}", -115_i8);
+    cmp!("{:>10}", -115_i16);
+    cmp!("{:>10}", -115_i32);
+    cmp!("{:>10}", -115_i64);
+    cmp!("{:>10}", -115_i128);
+    cmp!("{:>10}", -115_isize);
 }
 
 #[test]

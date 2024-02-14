@@ -271,6 +271,14 @@ fn write(input: TokenStream, newline: bool) -> TokenStream {
                         #pad_length
                     )?;))
                 }
+                Piece::Padding { pad_length, left_aligned } => {
+                    exprs.push(quote!(ufmt::uDisplayWithPadding::fmt_padding(
+                        #pat, 
+                        f, 
+                        #pad_length,
+                        #left_aligned,
+                    )?;))
+                }
             }
         }
     }
@@ -339,6 +347,10 @@ enum Piece<'a> {
         decimal_places: usize,
         pad_length: usize,
     },
+    Padding {
+        pad_length: usize,
+        left_aligned: bool,
+    }
 }
 
 impl Piece<'_> {
@@ -487,6 +499,13 @@ fn parse_colon(format: &str, span: Span) -> parse::Result<(Piece, &str)> {
     } else {
         (ch, false)
     };
+    let (ch, left_aligned) = if ch == '<' || ch == '>' {
+        let left_aligned = if ch == '<' {true} else {false};
+        let ch = chars.next().ok_or(err_piece())?;
+        (ch, left_aligned)
+    } else {
+        (ch, false)
+    };
     let (mut ch, pad_char) = if ch == '0' {
         let ch = chars.next().ok_or(err_piece())?;
         (ch, b'0')
@@ -541,7 +560,7 @@ fn parse_colon(format: &str, span: Span) -> parse::Result<(Piece, &str)> {
                 },
                 chars.as_str(),
             )),
-            '.' => if pad_char == b' ' && prefix == false && decimal_places < 7{
+            '.' => if pad_char == b' ' && prefix == false && decimal_places < 7 {
                 Ok((
                     Piece::Float {
                         decimal_places,
@@ -554,7 +573,19 @@ fn parse_colon(format: &str, span: Span) -> parse::Result<(Piece, &str)> {
             }
             _ => Err(err_piece()),
         }
-        None => Err(err_piece()),
+        None => {
+            if pad_char == b' ' && prefix == false {
+                Ok((
+                    Piece::Padding {
+                        pad_length,
+                        left_aligned,
+                    },
+                    chars.as_str(),
+                ))
+            } else {
+                Err(err_piece())
+            }
+        }
     }
 }
 
@@ -651,6 +682,30 @@ mod tests {
             Some(vec![Piece::Float {
                 decimal_places: 6,
                 pad_length: 17, 
+            }]),
+        );
+
+        assert_eq!(
+            super::parse("{:<27}", span).ok(),
+            Some(vec![Piece::Padding { 
+                pad_length: 27, 
+                left_aligned: true
+            }]),
+        );
+
+        assert_eq!(
+            super::parse("{:27}", span).ok(),
+            Some(vec![Piece::Padding { 
+                pad_length: 27, 
+                left_aligned: false
+            }]),
+        );
+
+        assert_eq!(
+            super::parse("{:>27}", span).ok(),
+            Some(vec![Piece::Padding { 
+                pad_length: 27, 
+                left_aligned: false
             }]),
         );
 

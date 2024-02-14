@@ -1,4 +1,4 @@
-use crate::{uDebug, uDisplay, uWrite, Formatter};
+use crate::{uDebug, uDisplay, uWrite, Formatter, uDisplayWithPadding};
 
 impl uDebug for bool {
     fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
@@ -22,6 +22,37 @@ impl uDisplay for bool {
         <bool as uDebug>::fmt(self, f)
     }
 }
+
+impl uDisplayWithPadding for bool {
+    fn fmt_padding<W>(
+        &self, 
+        fmt: &mut Formatter<'_, W>, 
+        pad_length: usize, 
+        left_aligned: bool
+    ) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized 
+    {
+        let s = if *self {
+            "true"
+        } else {
+            "false"
+        };
+        if left_aligned {
+            fmt.write_str(s)?;
+            for _ in s.len() .. pad_length {
+                fmt.write_char(' ')?;
+            }
+            Ok(())
+        } else {
+            for _ in s.len() .. pad_length {
+                fmt.write_char(' ')?;
+            }
+            fmt.write_str(s)
+        }
+    }
+}
+
 
 // FIXME this (`escape_debug`) contains a panicking branch
 // impl uDebug for char {
@@ -56,6 +87,31 @@ where
         W: uWrite + ?Sized,
     {
         f.debug_list()?.entries(self)?.finish()
+    }
+}
+
+impl uDisplayWithPadding for char {
+    fn fmt_padding<W>(
+        &self, 
+        fmt: &mut Formatter<'_, W>, 
+        pad_length: usize, 
+        left_aligned: bool
+    ) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized 
+    {
+        if left_aligned {
+            fmt.write_char(*self)?;
+            for _ in 1 .. pad_length {
+                fmt.write_char(' ')?;
+            }
+            Ok(())
+        } else {
+            for _ in 1 .. pad_length {
+                fmt.write_char(' ')?;
+            }
+            fmt.write_char(*self)
+        }
     }
 }
 
@@ -99,6 +155,31 @@ impl uDisplay for str {
         W: uWrite + ?Sized,
     {
         f.write_str(self)
+    }
+}
+
+impl uDisplayWithPadding for &str {
+    fn fmt_padding<W>(
+        &self, 
+        fmt: &mut Formatter<'_, W>, 
+        pad_length: usize, 
+        left_aligned: bool
+    ) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized 
+    {
+        if left_aligned {
+            fmt.write_str(self)?;
+            for _ in self.len() .. pad_length {
+                fmt.write_char(' ')?;
+            }
+            Ok(())
+        } else {
+            for _ in self.len() .. pad_length {
+                fmt.write_char(' ')?;
+            }
+            fmt.write_str(self)
+        }
     }
 }
 
