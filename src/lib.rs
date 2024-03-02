@@ -353,14 +353,24 @@ pub trait uDisplayFloat {
         W: uWrite + ?Sized;
 }
 
+/// This enum determines how the display is to be filled (trait uDisplayWithPadding)
+#[derive(PartialEq)]
+pub enum Format {
+    /// Padding left or right depending on type
+    Padded(usize),
+    /// Padding left aligned
+    LeftAligned(usize),
+    /// Padding right aligned
+    RightAligned(usize),
+}
+
 /// HEADS UP this is currently an implementation detail and not subject to semver guarantees.
 /// do NOT use this outside the `ufmt` crate
 #[doc(hidden)]
 #[allow(non_camel_case_types)]
 pub trait uDisplayWithPadding {
     /// Formats the value using the given formatter
-    /// left_aligned: 0: left, 1: right, 2: text left, numbers right
-    fn fmt_padding<W>(&self, _: &mut Formatter<'_, W>, pad_length: usize, left_aligned: u8) -> Result<(), W::Error>
+    fn fmt_padding<W>(&self, _: &mut Formatter<'_, W>, format: Format) -> Result<(), W::Error>
     where
         W: uWrite + ?Sized;
 }

@@ -1,4 +1,4 @@
-use crate::{uDebug, uDisplay, uWrite, Formatter, uDisplayWithPadding};
+use crate::{uDebug, uDisplay, uWrite, Formatter, uDisplayWithPadding, Format};
 
 impl uDebug for bool {
     fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
@@ -27,8 +27,7 @@ impl uDisplayWithPadding for bool {
     fn fmt_padding<W>(
         &self, 
         fmt: &mut Formatter<'_, W>, 
-        pad_length: usize, 
-        left_aligned: u8
+        format: Format
     ) -> Result<(), W::Error>
     where
         W: uWrite + ?Sized 
@@ -38,17 +37,20 @@ impl uDisplayWithPadding for bool {
         } else {
             "false"
         };
-        if left_aligned == 0 || left_aligned == 2 {
-            fmt.write_str(s)?;
-            for _ in s.len() .. pad_length {
-                fmt.write_char(' ')?;
+        match format {
+            Format::LeftAligned(pad_length) | Format::Padded(pad_length) => {
+                fmt.write_str(s)?;
+                for _ in s.len() .. pad_length {
+                    fmt.write_char(' ')?;
+                }
+                Ok(())
             }
-            Ok(())
-        } else {
-            for _ in s.len() .. pad_length {
-                fmt.write_char(' ')?;
+            Format::RightAligned(pad_length) => {
+                for _ in s.len() .. pad_length {
+                    fmt.write_char(' ')?;
+                }
+                fmt.write_str(s)
             }
-            fmt.write_str(s)
         }
     }
 }
@@ -94,23 +96,25 @@ impl uDisplayWithPadding for char {
     fn fmt_padding<W>(
         &self, 
         fmt: &mut Formatter<'_, W>, 
-        pad_length: usize, 
-        left_aligned: u8
+        format: Format
     ) -> Result<(), W::Error>
     where
         W: uWrite + ?Sized 
     {
-        if left_aligned == 0 || left_aligned == 2 {
-            fmt.write_char(*self)?;
-            for _ in 1 .. pad_length {
-                fmt.write_char(' ')?;
+        match format {
+            Format::LeftAligned(pad_length) | Format::Padded(pad_length) => {
+                fmt.write_char(*self)?;
+                for _ in 1 .. pad_length {
+                    fmt.write_char(' ')?;
+                }
+                Ok(())
             }
-            Ok(())
-        } else {
-            for _ in 1 .. pad_length {
-                fmt.write_char(' ')?;
+            Format::RightAligned(pad_length) => {
+                for _ in 1 .. pad_length {
+                    fmt.write_char(' ')?;
+                }
+                fmt.write_char(*self)
             }
-            fmt.write_char(*self)
         }
     }
 }
@@ -162,23 +166,25 @@ impl uDisplayWithPadding for &str {
     fn fmt_padding<W>(
         &self, 
         fmt: &mut Formatter<'_, W>, 
-        pad_length: usize, 
-        left_aligned: u8
+        format: Format
     ) -> Result<(), W::Error>
     where
         W: uWrite + ?Sized 
     {
-        if left_aligned == 0 || left_aligned == 2 {
-            fmt.write_str(self)?;
-            for _ in self.len() .. pad_length {
-                fmt.write_char(' ')?;
+        match format {
+            Format::LeftAligned(pad_length) | Format::Padded(pad_length) => {
+                fmt.write_str(self)?;
+                for _ in self.len() .. pad_length {
+                    fmt.write_char(' ')?;
+                }
+                Ok(())
             }
-            Ok(())
-        } else {
-            for _ in self.len() .. pad_length {
-                fmt.write_char(' ')?;
+            Format::RightAligned(pad_length) => {
+                for _ in self.len() .. pad_length {
+                    fmt.write_char(' ')?;
+                }
+                fmt.write_str(self)
             }
-            fmt.write_str(self)
         }
     }
 }

@@ -271,13 +271,30 @@ fn write(input: TokenStream, newline: bool) -> TokenStream {
                         #pad_length
                     )?;))
                 }
-                Piece::Padding { pad_length, left_aligned } => {
-                    exprs.push(quote!(ufmt::uDisplayWithPadding::fmt_padding(
-                        #pat, 
-                        f, 
-                        #pad_length,
-                        #left_aligned,
-                    )?;))
+                Piece::Padding { pad_length, format } => {
+                    match format {
+                        0 => {
+                            exprs.push(quote!(ufmt::uDisplayWithPadding::fmt_padding(
+                                #pat, 
+                                f, 
+                                ufmt::Format::LeftAligned(#pad_length),
+                            )?;))
+                        }
+                        1 => {
+                            exprs.push(quote!(ufmt::uDisplayWithPadding::fmt_padding(
+                                #pat, 
+                                f, 
+                                ufmt::Format::RightAligned(#pad_length),
+                            )?;))
+                        }
+                        _ => {
+                            exprs.push(quote!(ufmt::uDisplayWithPadding::fmt_padding(
+                                #pat, 
+                                f, 
+                                ufmt::Format::Padded(#pad_length),
+                            )?;))
+                        }
+                    }
                 }
             }
         }
@@ -349,7 +366,7 @@ enum Piece<'a> {
     },
     Padding {
         pad_length: usize,
-        left_aligned: u8,
+        format: u8,   // 0 left aligned, 1 right aligned, 2 padded
     }
 }
 
@@ -578,7 +595,7 @@ fn parse_colon(format: &str, span: Span) -> parse::Result<(Piece, &str)> {
                 Ok((
                     Piece::Padding {
                         pad_length,
-                        left_aligned,
+                        format: left_aligned,
                     },
                     chars.as_str(),
                 ))
@@ -689,7 +706,7 @@ mod tests {
             super::parse("{:<27}", span).ok(),
             Some(vec![Piece::Padding { 
                 pad_length: 27, 
-                left_aligned: 0
+                format: 0
             }]),
         );
 
@@ -697,7 +714,7 @@ mod tests {
             super::parse("{:>27}", span).ok(),
             Some(vec![Piece::Padding { 
                 pad_length: 27, 
-                left_aligned: 1
+                format: 1
             }]),
         );
 
@@ -705,7 +722,7 @@ mod tests {
             super::parse("{:27}", span).ok(),
             Some(vec![Piece::Padding { 
                 pad_length: 27, 
-                left_aligned: 2
+                format: 2
             }]),
         );
 

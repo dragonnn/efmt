@@ -1,6 +1,6 @@
 use core::{mem::MaybeUninit, slice, str};
 
-use crate::{uDebug, uDisplay, uWrite, Formatter, uDisplayWithPadding};
+use crate::{uDebug, uDisplay, uWrite, Formatter, uDisplayWithPadding, Format};
 
 macro_rules! ixx {
     ($uxx:ty, $n:expr, $len:expr) => {{
@@ -61,24 +61,26 @@ macro_rules! ixx_trait_impl {
             fn fmt_padding<W>(
                 &self, 
                 fmt: &mut Formatter<'_, W>, 
-                pad_length: usize, 
-                left_aligned: u8
+                format: Format
             ) -> Result<(), W::Error>
             where
                 W: uWrite + ?Sized 
             {
                 let s = ixx!($utype, *self, $len);
-                if left_aligned == 0 {
-                    fmt.write_str(s)?;
-                    for _ in s.len() .. pad_length {
-                        fmt.write_char(' ')?;
+                match format {
+                    Format::LeftAligned(pad_length) => {
+                        fmt.write_str(s)?;
+                        for _ in s.len() .. pad_length {
+                            fmt.write_char(' ')?;
+                        }
+                        Ok(())
                     }
-                    Ok(())
-                } else {
-                    for _ in s.len() .. pad_length {
-                        fmt.write_char(' ')?;
+                    Format::Padded(pad_length) | Format::RightAligned(pad_length) => {
+                        for _ in s.len() .. pad_length {
+                            fmt.write_char(' ')?;
+                        }
+                        fmt.write_str(s)
                     }
-                    fmt.write_str(s)
                 }
             }
         }    
