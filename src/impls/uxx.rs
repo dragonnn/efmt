@@ -1,6 +1,6 @@
 use core::{mem::MaybeUninit, slice, str};
 
-use crate::{uDebug, uDisplay, uWrite, Formatter, uDisplayWithPadding, Format};
+use crate::{uDebug, uDisplay, uWrite, Formatter, uDisplayWithPadding, Padding};
 
 macro_rules! uxx {
     ($n:expr, $len:expr) => {{
@@ -46,25 +46,38 @@ macro_rules! uxx_trait_impl {
             fn fmt_padding<W>(
                 &self, 
                 fmt: &mut Formatter<'_, W>, 
-                format: Format
+                padding: Padding,
+                pad_char: char,
             ) -> Result<(), W::Error>
             where
                 W: uWrite + ?Sized 
             {
                 let s = uxx!(*self, $len);
-                match format {
-                    Format::LeftAligned(pad_length) => {
+                match padding {
+                    Padding::LeftAligned(pad_length) => {
                         fmt.write_str(s)?;
                         for _ in s.len() .. pad_length {
-                            fmt.write_char(' ')?;
+                            fmt.write_char(pad_char)?;
                         }
                         Ok(())
                     }
-                    Format::Padded(pad_length) | Format::RightAligned(pad_length) => {
+                    Padding::Usual(pad_length) | Padding::RightAligned(pad_length) => {
                         for _ in s.len() .. pad_length {
-                            fmt.write_char(' ')?;
+                            fmt.write_char(pad_char)?;
                         }
                         fmt.write_str(s)
+                    }
+                    Padding::CenterAligned(pad_length) => {
+                        let padding = pad_length - s.len();
+                        let half = padding / 2;
+                        for _ in 0..half {
+                            fmt.write_char(pad_char)?;
+                        }
+                        fmt.write_str(s)?;
+                        for _ in half .. padding {
+                            fmt.write_char(pad_char)?;
+                        }
+                        Ok(())
                     }
                 }
             }

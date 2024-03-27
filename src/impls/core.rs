@@ -1,4 +1,4 @@
-use crate::{uDebug, uDisplay, uWrite, Formatter, uDisplayWithPadding, Format};
+use crate::{uDebug, uDisplay, uWrite, Formatter, uDisplayWithPadding, Padding};
 
 impl uDebug for bool {
     fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
@@ -27,7 +27,8 @@ impl uDisplayWithPadding for bool {
     fn fmt_padding<W>(
         &self, 
         fmt: &mut Formatter<'_, W>, 
-        format: Format
+        padding: Padding,
+        pad_char: char,
     ) -> Result<(), W::Error>
     where
         W: uWrite + ?Sized 
@@ -37,21 +38,7 @@ impl uDisplayWithPadding for bool {
         } else {
             "false"
         };
-        match format {
-            Format::LeftAligned(pad_length) | Format::Padded(pad_length) => {
-                fmt.write_str(s)?;
-                for _ in s.len() .. pad_length {
-                    fmt.write_char(' ')?;
-                }
-                Ok(())
-            }
-            Format::RightAligned(pad_length) => {
-                for _ in s.len() .. pad_length {
-                    fmt.write_char(' ')?;
-                }
-                fmt.write_str(s)
-            }
-        }
+        s.fmt_padding(fmt, padding, pad_char)
     }
 }
 
@@ -96,24 +83,37 @@ impl uDisplayWithPadding for char {
     fn fmt_padding<W>(
         &self, 
         fmt: &mut Formatter<'_, W>, 
-        format: Format
+        padding: Padding,
+        pad_char: char,
     ) -> Result<(), W::Error>
     where
         W: uWrite + ?Sized 
     {
-        match format {
-            Format::LeftAligned(pad_length) | Format::Padded(pad_length) => {
+        match padding {
+            Padding::LeftAligned(pad_length) | Padding::Usual(pad_length) => {
                 fmt.write_char(*self)?;
                 for _ in 1 .. pad_length {
-                    fmt.write_char(' ')?;
+                    fmt.write_char(pad_char)?;
                 }
                 Ok(())
             }
-            Format::RightAligned(pad_length) => {
+            Padding::RightAligned(pad_length) => {
                 for _ in 1 .. pad_length {
-                    fmt.write_char(' ')?;
+                    fmt.write_char(pad_char)?;
                 }
                 fmt.write_char(*self)
+            }
+            Padding::CenterAligned(pad_length) => {
+                let padding = pad_length - 1;
+                let half = padding / 2;
+                for _ in 0..half {
+                    fmt.write_char(pad_char)?;
+                }
+                fmt.write_char(*self)?;
+                for _ in half .. padding {
+                    fmt.write_char(pad_char)?;
+                }
+                Ok(())
             }
         }
     }
@@ -166,24 +166,37 @@ impl uDisplayWithPadding for &str {
     fn fmt_padding<W>(
         &self, 
         fmt: &mut Formatter<'_, W>, 
-        format: Format
+        format: Padding,
+        pad_char: char,
     ) -> Result<(), W::Error>
     where
         W: uWrite + ?Sized 
     {
         match format {
-            Format::LeftAligned(pad_length) | Format::Padded(pad_length) => {
+            Padding::LeftAligned(pad_length) | Padding::Usual(pad_length) => {
                 fmt.write_str(self)?;
                 for _ in self.len() .. pad_length {
-                    fmt.write_char(' ')?;
+                    fmt.write_char(pad_char)?;
                 }
                 Ok(())
             }
-            Format::RightAligned(pad_length) => {
+            Padding::RightAligned(pad_length) => {
                 for _ in self.len() .. pad_length {
-                    fmt.write_char(' ')?;
+                    fmt.write_char(pad_char)?;
                 }
                 fmt.write_str(self)
+            }
+            Padding::CenterAligned(pad_length) => {
+                let padding = pad_length - self.len();
+                let half = padding / 2;
+                for _ in 0..half {
+                    fmt.write_char(pad_char)?;
+                }
+                fmt.write_str(self)?;
+                for _ in half .. padding {
+                    fmt.write_char(pad_char)?;
+                }
+                Ok(())
             }
         }
     }

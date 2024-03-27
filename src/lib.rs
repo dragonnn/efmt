@@ -265,6 +265,28 @@ pub trait uDisplay {
         W: uWrite + ?Sized;
 }
 
+/// This enum determines how the display is to be filled (trait uDisplayWithPadding)
+#[derive(PartialEq, Clone, Copy)]
+pub enum Padding {
+    /// Usual padding left or right depending on type
+    Usual(usize),
+    /// Padding left aligned
+    LeftAligned(usize),
+    /// Padding right aligned
+    RightAligned(usize),
+    /// Padding on left and right side
+    CenterAligned(usize),
+}
+
+/// This trait allows a display including padding to be implemented
+#[allow(non_camel_case_types)]
+pub trait uDisplayWithPadding {
+    /// Formats the value using the given formatter
+    fn fmt_padding<W>(&self, _: &mut Formatter<'_, W>, padding: Padding, pad_char: char) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized;
+}
+
 /// HEADS UP this is currently an implementation detail and not subject to semver guarantees.
 /// do NOT use this outside the `ufmt` crate
 // options for formatting hexadecimal numbers
@@ -347,30 +369,9 @@ pub trait uDisplayFloat {
         &self, 
         _: &mut Formatter<'_, W>, 
         decimal_places: usize, 
-        pad_length: usize
+        padding: Padding,
+        pad_char: char,
     ) -> Result<(), W::Error>
-    where
-        W: uWrite + ?Sized;
-}
-
-/// This enum determines how the display is to be filled (trait uDisplayWithPadding)
-#[derive(PartialEq)]
-pub enum Format {
-    /// Padding left or right depending on type
-    Padded(usize),
-    /// Padding left aligned
-    LeftAligned(usize),
-    /// Padding right aligned
-    RightAligned(usize),
-}
-
-/// HEADS UP this is currently an implementation detail and not subject to semver guarantees.
-/// do NOT use this outside the `ufmt` crate
-#[doc(hidden)]
-#[allow(non_camel_case_types)]
-pub trait uDisplayWithPadding {
-    /// Formats the value using the given formatter
-    fn fmt_padding<W>(&self, _: &mut Formatter<'_, W>, format: Format) -> Result<(), W::Error>
     where
         W: uWrite + ?Sized;
 }

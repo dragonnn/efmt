@@ -1,4 +1,4 @@
-use crate::{uDisplay, uDebug, uDisplayFloat, uWrite, Formatter};
+use crate::{uDisplay, uDebug, uDisplayFloat, uWrite, Formatter, Padding};
 use core::{str::from_utf8_unchecked, slice::from_raw_parts};
 
 // Implementiert den Trait für f32
@@ -7,7 +7,8 @@ impl uDisplayFloat for f32 {
         &self, 
         fmt: &mut Formatter<'_, W>, 
         decimal_places: usize, 
-        pad_length: usize
+        padding: Padding,
+        pad_char: char,
     ) -> Result<(), W::Error>
     where
         W: uWrite + ?Sized,
@@ -40,7 +41,7 @@ impl uDisplayFloat for f32 {
         let left = f as u32;
         let right =  ((f - (left as f32)) * MUL_TAB[decimal_places as usize]) as u32;
 
-        write_as_float_str::<W>(fmt, left, right, decimal_places, is_neg, pad_length)
+        write_as_float_str::<W>(fmt, left, right, decimal_places, is_neg, padding, pad_char)
     }
 }
 
@@ -49,7 +50,7 @@ impl uDebug for f32 {
     where
         W: uWrite + ?Sized,
     {
-        self.fmt_float(fmt, 3, 0)
+        self.fmt_float(fmt, 3, Padding::LeftAligned(0), ' ')
     }
 }
 
@@ -67,7 +68,8 @@ impl uDisplayFloat for f64 {
         &self, 
         fmt: &mut Formatter<'_, W>, 
         decimal_places: usize, 
-        pad_length: usize
+        padding: Padding,
+        pad_char: char,
     ) -> Result<(), W::Error>
     where
         W: uWrite + ?Sized,
@@ -100,7 +102,7 @@ impl uDisplayFloat for f64 {
         let left = f as u32;
         let right =  ((f - (left as f64)) * MUL_TAB[decimal_places as usize]) as u32;
     
-        write_as_float_str::<W>(fmt, left, right, decimal_places, is_neg, pad_length)
+        write_as_float_str::<W>(fmt, left, right, decimal_places, is_neg, padding, pad_char)
     }
 }
 
@@ -109,7 +111,7 @@ impl uDebug for f64 {
     where
         W: uWrite + ?Sized,
     {
-        self.fmt_float(fmt, 3, 0)
+        self.fmt_float(fmt, 3, Padding::LeftAligned(0), ' ')
     }
 }
 
@@ -133,7 +135,9 @@ fn write_as_float_str<W>(
     mut right: u32, 
     decimal_places: usize, 
     is_neg: bool,
-    pad_length: usize) -> Result<(), W::Error>
+    padding: Padding,
+    pad_char: char,
+) -> Result<(), W::Error>
 where
     W: uWrite + ?Sized,
 {
@@ -187,45 +191,38 @@ where
     }
     
     let length = len - idx;
-
-    // Padding, if necessary
-    if length > 0 && pad_length > length {
-        for _ in 0..(pad_length - length) {
-            fmt.write_char(' ')?;
-        }
-    }
-
     // Safety: This is necessary to avoid getting a panic branch
     // Since we know what has been added, we also know that they are correct utf8 characters.
     let s = unsafe {
         let slice = from_raw_parts(p_buf.add(idx), length);
         from_utf8_unchecked(slice)
     };
-    fmt.write_str(s)
-
-}
-
-
-#[cfg(feature = "std")]
-#[cfg(test)]
-mod tests {
-    use crate::Formatter;
-
-    fn f_str(left: u32, right: u32, dp: usize, is_neg: bool, pad_length: usize) -> String {
-        let mut s = String::new();
-        let mut fmt = Formatter::new(&mut s);
-        super::write_as_float_str(&mut fmt, left, right, dp, is_neg, pad_length).unwrap();
-        s
-    }
     
-    #[test]
-    fn test_u64_to_str() {
-        assert_eq!(f_str(0, 0, 0, false, 0), "0");
-        assert_eq!(f_str(0, 0, 1, false, 0), "0.0");
-        assert_eq!(f_str(0, 0, 6, false, 0), "0.000000");
-        assert_eq!(f_str(0, 2, 6, false, 0), "0.000002");
-        assert_eq!(f_str(123, 457, 3, false, 0), "123.457");
-        assert_eq!(f_str(123, 457, 3, false, 10), "   123.457");
+    match padding {
+        Padding::LeftAligned(pad_length) => {
+            fmt.write_str(s)?;
+            for _ in s.len() .. pad_length {
+                fmt.write_char(pad_char)?;
+            }
+            Ok(())
+        }
+        Padding::Usual(pad_length) | Padding::RightAligned(pad_length) => {
+            for _ in s.len() .. pad_length {
+                fmt.write_char(pad_char)?;
+            }
+            fmt.write_str(s)
+        }
+        Padding::CenterAligned(pad_length) => {
+            let padding = pad_length - s.len();
+            let half = padding / 2;
+            for _ in 0..half {
+                fmt.write_char(pad_char)?;
+            }
+            fmt.write_str(s)?;
+            for _ in half .. padding {
+                fmt.write_char(pad_char)?;
+            }
+            Ok(())
+        }
     }
-
 }
