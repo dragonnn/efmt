@@ -263,35 +263,78 @@ fn write(input: TokenStream, newline: bool) -> TokenStream {
                         ox_prefix: #prefix})?;));
                 }
                 Piece::Str(_) => unreachable!(),
-                Piece::Float { decimal_places, pad_length } => {
-                    exprs.push(quote!(ufmt::uDisplayFloat::fmt_float(
-                        #pat, 
-                        f, 
-                        #decimal_places, 
-                        #pad_length
-                    )?;))
+                Piece::Float { decimal_places, pad_length, pad_char, format } => {
+                    match format {
+                        0 => {
+                            exprs.push(quote!(ufmt::uDisplayFloat::fmt_float(
+                                #pat, 
+                                f, 
+                                #decimal_places, 
+                                ufmt::Padding::LeftAligned(#pad_length),
+                                #pad_char
+                            )?;))
+                        }
+                        1 => {
+                            exprs.push(quote!(ufmt::uDisplayFloat::fmt_float(
+                                #pat, 
+                                f, 
+                                #decimal_places, 
+                                ufmt::Padding::RightAligned(#pad_length),
+                                #pad_char
+                            )?;))
+                        }
+                        2 => {
+                            exprs.push(quote!(ufmt::uDisplayFloat::fmt_float(
+                                #pat, 
+                                f, 
+                                #decimal_places, 
+                                ufmt::Padding::CenterAligned(#pad_length),
+                                #pad_char
+                            )?;))
+                        }
+                        _ => {
+                            exprs.push(quote!(ufmt::uDisplayFloat::fmt_float(
+                                #pat, 
+                                f, 
+                                #decimal_places, 
+                                ufmt::Padding::Usual(#pad_length),
+                                #pad_char
+                            )?;))
+                        }
+                    }
                 }
-                Piece::Padding { pad_length, format } => {
+                Piece::Padding { pad_length, pad_char, format } => {
                     match format {
                         0 => {
                             exprs.push(quote!(ufmt::uDisplayWithPadding::fmt_padding(
                                 #pat, 
                                 f, 
-                                ufmt::Format::LeftAligned(#pad_length),
+                                ufmt::Padding::LeftAligned(#pad_length),
+                                #pad_char
                             )?;))
                         }
                         1 => {
                             exprs.push(quote!(ufmt::uDisplayWithPadding::fmt_padding(
                                 #pat, 
                                 f, 
-                                ufmt::Format::RightAligned(#pad_length),
+                                ufmt::Padding::RightAligned(#pad_length),
+                                #pad_char
+                            )?;))
+                        }
+                        2 => {
+                            exprs.push(quote!(ufmt::uDisplayWithPadding::fmt_padding(
+                                #pat, 
+                                f, 
+                                ufmt::Padding::CenterAligned(#pad_length),
+                                #pad_char
                             )?;))
                         }
                         _ => {
                             exprs.push(quote!(ufmt::uDisplayWithPadding::fmt_padding(
                                 #pat, 
                                 f, 
-                                ufmt::Format::Padded(#pad_length),
+                                ufmt::Padding::Usual(#pad_length),
+                                #pad_char
                             )?;))
                         }
                     }
@@ -363,9 +406,12 @@ enum Piece<'a> {
     Float {
         decimal_places: usize,
         pad_length: usize,
+        pad_char: char,
+        format: u8,   // 0 left aligned, 1 right aligned, 2 padded
     },
     Padding {
         pad_length: usize,
+        pad_char: char,
         format: u8,   // 0 left aligned, 1 right aligned, 2 padded
     }
 }
@@ -516,18 +562,19 @@ fn parse_colon(format: &str, span: Span) -> parse::Result<(Piece, &str)> {
     } else {
         (ch, false)
     };
-    let (ch, left_aligned) = if ch == '<' || ch == '>' {
-        let left_aligned = if ch == '<' {0_u8} else {1_u8};
-        let ch = chars.next().ok_or(err_piece())?;
-        (ch, left_aligned)
-    } else {
-        (ch, 2_u8)
-    };
-    let (mut ch, pad_char) = if ch == '0' {
+
+    let (ch, pad_char) = if ch == '0' {
         let ch = chars.next().ok_or(err_piece())?;
         (ch, b'0')
     } else {
         (ch, b' ')
+    };
+
+    let (mut ch, alignment) = match ch {
+        '<' => (chars.next().ok_or(err_piece())?, 0_u8),
+        '>' => (chars.next().ok_or(err_piece())?, 1_u8),
+        '^' => (chars.next().ok_or(err_piece())?, 2_u8),
+        _ => (ch, 3_u8)
     };
 
     let mut pad_length = 0_usize;
@@ -577,11 +624,13 @@ fn parse_colon(format: &str, span: Span) -> parse::Result<(Piece, &str)> {
                 },
                 chars.as_str(),
             )),
-            '.' => if pad_char == b' ' && prefix == false && decimal_places < 7 {
+            '.' => if prefix == false && decimal_places < 7 {
                 Ok((
                     Piece::Float {
                         decimal_places,
                         pad_length,
+                        pad_char: pad_char as char,
+                        format: alignment,
                     },
                     chars.as_str(),
                 ))   
@@ -591,11 +640,12 @@ fn parse_colon(format: &str, span: Span) -> parse::Result<(Piece, &str)> {
             _ => Err(err_piece()),
         }
         None => {
-            if pad_char == b' ' && prefix == false {
+            if prefix == false {
                 Ok((
                     Piece::Padding {
                         pad_length,
-                        format: left_aligned,
+                        pad_char: pad_char as char,
+                        format: alignment,
                     },
                     chars.as_str(),
                 ))
@@ -683,6 +733,8 @@ mod tests {
             Some(vec![Piece::Float {
                 decimal_places: 0,
                 pad_length: 0,
+                pad_char: ' ',
+                format: 3,
             }]),
         );
 
@@ -691,6 +743,8 @@ mod tests {
             Some(vec![Piece::Float {
                 decimal_places: 6,
                 pad_length: 0, 
+                pad_char: ' ',
+                format: 3,
             }]),
         );
 
@@ -699,6 +753,48 @@ mod tests {
             Some(vec![Piece::Float {
                 decimal_places: 6,
                 pad_length: 17, 
+                pad_char: ' ',
+                format: 3,
+            }]),
+        );
+
+        assert_eq!(
+            super::parse("{:<17.6}", span).ok(),
+            Some(vec![Piece::Float {
+                decimal_places: 6,
+                pad_length: 17, 
+                pad_char: ' ',
+                format: 0,
+            }]),
+        );
+
+        assert_eq!(
+            super::parse("{:>17.6}", span).ok(),
+            Some(vec![Piece::Float {
+                decimal_places: 6,
+                pad_length: 17, 
+                pad_char: ' ',
+                format: 1,
+            }]),
+        );
+
+        assert_eq!(
+            super::parse("{:^17.6}", span).ok(),
+            Some(vec![Piece::Float {
+                decimal_places: 6,
+                pad_length: 17, 
+                pad_char: ' ',
+                format: 2,
+            }]),
+        );
+
+        assert_eq!(
+            super::parse("{:0^17.6}", span).ok(),
+            Some(vec![Piece::Float {
+                decimal_places: 6,
+                pad_length: 17, 
+                pad_char: '0',
+                format: 2,
             }]),
         );
 
@@ -706,6 +802,7 @@ mod tests {
             super::parse("{:<27}", span).ok(),
             Some(vec![Piece::Padding { 
                 pad_length: 27, 
+                pad_char: ' ',
                 format: 0
             }]),
         );
@@ -714,7 +811,17 @@ mod tests {
             super::parse("{:>27}", span).ok(),
             Some(vec![Piece::Padding { 
                 pad_length: 27, 
+                pad_char: ' ',
                 format: 1
+            }]),
+        );
+
+        assert_eq!(
+            super::parse("{:^27}", span).ok(),
+            Some(vec![Piece::Padding { 
+                pad_length: 27, 
+                pad_char: ' ',
+                format: 2
             }]),
         );
 
@@ -722,7 +829,17 @@ mod tests {
             super::parse("{:27}", span).ok(),
             Some(vec![Piece::Padding { 
                 pad_length: 27, 
-                format: 2
+                pad_char: ' ',
+                format: 3
+            }]),
+        );
+
+        assert_eq!(
+            super::parse("{:0<27}", span).ok(),
+            Some(vec![Piece::Padding { 
+                pad_length: 27, 
+                pad_char: '0',
+                format: 0
             }]),
         );
 
