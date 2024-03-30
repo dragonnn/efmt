@@ -25,7 +25,7 @@ impl uDisplayFloat for f32 {
         }
 
         if *self < -8388608.0 { // 2**23
-            fmt.write_str("uflw")?;
+            fmt.write_str("-ovfl")?;
             return Ok(());
         }
 
@@ -86,7 +86,7 @@ impl uDisplayFloat for f64 {
         }
 
         if *self < -4_294_967_295.0 { // u32::MAX
-            fmt.write_str("uflw")?;
+            fmt.write_str("-ovfl")?;
             return Ok(());
         }
 

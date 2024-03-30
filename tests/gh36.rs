@@ -1,4 +1,4 @@
-//! `uwrite!` works in presence of a third-party `Ok` constructor
+/// `uwrite!` works in presence of a third-party `Ok` constructor
 
 mod third_party {
     #[allow(dead_code)]
