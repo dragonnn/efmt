@@ -39,7 +39,7 @@ macro_rules! uformat {
 #[macro_export]
 #[cfg(feature = "std")]
 macro_rules! uformat {
-    ($($tt:tt)*) => {{
+    ($cap:expr, $($tt:tt)*) => {{
         let mut s = String::new();
         #[allow(unreachable_code)]
         match tfmt::uwrite!(&mut s, $($tt)*) {
