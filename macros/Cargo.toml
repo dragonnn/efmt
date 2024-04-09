@@ -1,13 +1,13 @@
 [package]
-authors = ["Jorge Aparicio <jorge@japaric.io>"]
+authors = ["Jorge Aparicio <jorge@japaric.io>", "Winfried Simon <winfried.simon@gmail.com"]
 categories = ["embedded", "no-std"]
-description = "`μfmt` macros"
+description = "`nfmt` macros"
 edition = "2021"
 keywords = ["Debug", "Display", "Write", "format"]
 license = "MIT OR Apache-2.0"
-name = "ufmt-macros"
-repository = "https://github.com/japaric/ufmt"
-version = "0.3.0"
+name = "nfmt-macros"
+repository = "https://github.com/simsys/nfmt"
+version = "0.1.0"
 
 [lib]
 proc-macro = true

@@ -3,7 +3,7 @@
 use core::{convert::Infallible, ptr};
 
 use panic_never as _;
-use ufmt::uWrite;
+use sfmt::uWrite;
 
 pub struct W;
 

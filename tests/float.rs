@@ -43,30 +43,12 @@ fn f32() {
     cmp!("{:.3}", f32::MIN_POSITIVE);
     cmp!("{:.6}", 8388607.1234567_f32);
 
-    assert_eq!(
-        uformat!("{:.3}", F_MAX32 + 1.0_f32),
-        Ok(String::from("ovfl")) // std::format "8388609.000"
-    );
-    assert_eq!(
-        uformat!("{:.3}", -F_MAX32 - 1.0_f32),
-        Ok(String::from("-ovfl")) // std::format "-8388609.000"
-    );
-    assert_eq!(
-        uformat!("{:.3}", f32::INFINITY),
-        Ok(String::from("ovfl")) // std::format "inf"
-    );
-    assert_eq!(
-        uformat!("{:.3}", f32::NEG_INFINITY),
-        Ok(String::from("-ovfl")) // std::format "-inf"
-    );
-    assert_eq!(
-        uformat!("{}", 321.123456_f32),
-        Ok(String::from("321.123")) // std::format "321.12344"
-    );
-    assert_eq!(
-        uformat!("{}", 321.0_f32),
-        Ok(String::from("321.000")) // std::format "321"
-    );
+    cmp_str!("ovfl", "{:.3}", F_MAX32 + 1.0_f32); // std::format "8388609.000"
+    cmp_str!("-ovfl", "{:.3}", -F_MAX32 - 1.0_f32); // std::format "-8388609.000"
+    cmp_str!("ovfl", "{:.3}", f32::INFINITY); // std::format "inf"
+    cmp_str!("-ovfl", "{:.3}", f32::NEG_INFINITY); // std::format "-inf"
+    cmp_str!("321.123", "{}", 321.123456_f32); // std::format "321.12344"
+    cmp_str!("321.000", "{}", 321.0_f32); // std::format "321"
 }
 
 #[test]
@@ -112,28 +94,10 @@ fn f64() {
     cmp!("{:.3}", f64::EPSILON);
     cmp!("{:.3}", f64::MIN_POSITIVE);
 
-    assert_eq!(
-        uformat!("{:.3}", F_MAX64 + 1.0_f64),
-        Ok(String::from("ovfl")) // std::format "1844674407371.000"
-    );
-    assert_eq!(
-        uformat!("{:.3}", -F_MAX64 - 1.0_f64),
-        Ok(String::from("-ovfl")) // std::format "-1844674407371.000"
-    );
-    assert_eq!(
-        uformat!("{:.3}", f64::INFINITY),
-        Ok(String::from("ovfl")) // std::format "inf"
-    );
-    assert_eq!(
-        uformat!("{:.3}", f64::NEG_INFINITY),
-        Ok(String::from("-ovfl")) // std::format "-inf"
-    );
-    assert_eq!(
-        uformat!("{}", 321.123456_f64),
-        Ok(String::from("321.123")) // std::format "321.123456"
-    );
-    assert_eq!(
-        uformat!("{}", 321.0_f64),
-        Ok(String::from("321.000")) // std::format "321"
-    );
+    cmp_str!("ovfl", "{:.3}", F_MAX64 + 1.0_f64); // std::format "1844674407371.000"
+    cmp_str!("-ovfl", "{:.3}", -F_MAX64 - 1.0_f64); // std::format "-1844674407371.000"
+    cmp_str!("ovfl", "{:.3}", f64::INFINITY); // std::format "inf"
+    cmp_str!("-ovfl", "{:.3}", f64::NEG_INFINITY); // std::format "-inf"
+    cmp_str!("321.123", "{}", 321.123456_f64); // std::format "321.123456"
+    cmp_str!("321.000", "{}", 321.0_f64); // std::format "321"
 }

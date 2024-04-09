@@ -1,123 +1,48 @@
-# `μfmt`
+A small, fast and panic-free alternative to core::fmt
 
-> A (6-40x) smaller, (2-9x) faster and panic-free alternative to `core::fmt`
+The basis for the development of sfmt is [japaric's ufmt](https://github.com/japaric/ufmt).
 
-![Call graph of formatting structs](cg.png)
+# Design goals
+- Optimised for size and speed for small embedded systems
+- No panicking branches in generated code when optimised
+- Usable during development `Debug`and runtime `Display`
 
-Call graph of a program that formats some structs (generated using
-[`cargo-call-stack`]). Source code can be found at the bottom of this file. The
-program was compiled with `-C opt-level=z`.
+# Features
+- String conversation and formatting options for the following data types included
+  - u8, u16, u32, u64, u128, usize
+  - i8, i16, i32, i64, i128, isize
+  - bool, str, char
+  - f32, f64
+- [`#[derive(uDebug)]`][derive]
+- `uDebug` and `uDisplay` traits like [core::fmt::Debug] and [core::fmt::Display]
+- [uDisplayPadded] trait for your own formatted outputs
+- [uDisplayFormatted] trait for your own complex formatted outputs
+- [uformat] macro to simply generate strings
 
-[`cargo-call-stack`]: https://crates.io/crates/cargo-call-stack
+# Formatting Examples
 
-## [API docs](https://docs.rs/ufmt)
+```
+    use sfmt::uformat;
 
-## Design goals
+    assert_eq!("4711",     uformat!(100, "{}", 4711_u32).unwrap().as_str());
+    assert_eq!("00004711", uformat!(100, "{:08}", 4711_u32).unwrap().as_str());
+    assert_eq!("   -4711", uformat!(100, "{:8}", -4711_i32).unwrap().as_str());
+    assert_eq!("-4711   ", uformat!(100, "{:<8}", -4711_i32).unwrap().as_str());
+    assert_eq!("    4711", uformat!(100, "{:>8}", 4711_u32).unwrap().as_str());
+    assert_eq!("  4711  ", uformat!(100, "{:^8}", 4711_u32).unwrap().as_str());
+    assert_eq!("  4711  ", uformat!(100, "{:^8}", 4711_u32).unwrap().as_str());
 
-From highest priority to lowest priority
+    assert_eq!("1ab4",     uformat!(100, "{:x}", 0x1ab4_u32).unwrap().as_str());
+    assert_eq!("    1AB4", uformat!(100, "{:8X}", 0x1ab4_u32).unwrap().as_str());
+    assert_eq!("0x1ab4",   uformat!(100, "{:#x}", 0x1ab4_u32).unwrap().as_str());
 
-- Optimized for binary size and speed (rather than for compilation time)
+    assert_eq!("3.14",     uformat!(100, "{:.2}", 3.14).unwrap().as_str());
+    assert_eq!("    3.14", uformat!(100, "{:8.2}", 3.14).unwrap().as_str());
+    assert_eq!("3.14    ", uformat!(100, "{:<8.2}", 3.14).unwrap().as_str());
+    assert_eq!("  3.14  ", uformat!(100, "{:^8.2}", 3.14).unwrap().as_str());
+    assert_eq!("00003.14", uformat!(100, "{:08.2}", 3.14).unwrap().as_str());
 
-- No dynamic dispatch in generated code
-
-- No panicking branches in generated code, when optimized
-
-- No recursion where possible
-
-## Features
-
-- `Debug` and `Display`-like traits
-
-- `core::write!`-like macro
-
-- A generic `Formatter<'_, impl uWrite>` instead of a single `core::Formatter`;
-  the `uWrite` trait has an associated error type so each writer can choose its
-  error type. For example, the implementation for `std::String` uses
-  `Infallible` as its error type.
-
-- `core::fmt::Formatter::debug_struct`-like API
-
-- `#[derive(uDebug)]`
-
-- Pretty formatting (`{:#?}`) for `uDebug`
-
-- Hexadecimal formatting (`{:x}`) of integer primitives (e.g. `i32`)
-
-- Simple f32 and f64 formating (`{:.0}`) ... (`{:.6}`)
-
-# Minimum Supported Rust Version (MSRV)
-
-This crate does *not* have a Minimum Supported Rust Version (MSRV) and may make use of language
-features and API in the standard library available in the latest stable Rust version.
-
-In other words, changes in the Rust version requirement of this crate are not considered semver
-breaking change and may occur in patch version release.
-
-## License
-
-All source code (including code snippets) is licensed under either of
-
-- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
-  [https://www.apache.org/licenses/LICENSE-2.0][L1])
-
-- MIT license ([LICENSE-MIT](LICENSE-MIT) or
-  [https://opensource.org/licenses/MIT][L2])
-
-[L1]: https://www.apache.org/licenses/LICENSE-2.0
-[L2]: https://opensource.org/licenses/MIT
-
-at your option.
-
-### Contribution
-
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
-licensed as above, without any additional terms or conditions.
-
-## Appendix
-
-### Formatting structs (snippet)
-
-Full source code in [nopanic/examples/struct.rs](nopanic/examples/struct.rs).
-
-``` rust
-// ..
-
-#[derive(Clone, Copy, uDebug)]
-struct Pair {
-    x: i32,
-    y: i32,
-}
-
-static X: AtomicI32 = AtomicI32::new(0);
-static Y: AtomicI32 = AtomicI32::new(0);
-
-#[exception]
-fn PendSV() {
-    let x = X.load(Ordering::Relaxed);
-    let y = Y.load(Ordering::Relaxed);
-
-    uwrite!(&mut W, "{:?}", Braces {}).unwrap();
-    uwrite!(&mut W, "{:#?}", Braces {}).unwrap();
-
-    uwrite!(&mut W, "{:?}", Parens()).unwrap();
-    uwrite!(&mut W, "{:#?}", Parens()).unwrap();
-
-    uwrite!(&mut W, "{:?}", I32(x)).unwrap();
-    uwrite!(&mut W, "{:#?}", I32(x)).unwrap();
-
-    uwrite!(&mut W, "{:?}", Tuple(x, y)).unwrap();
-    uwrite!(&mut W, "{:#?}", Tuple(x, y)).unwrap();
-
-    let pair = Pair { x, y };
-    uwrite!(&mut W, "{:?}", pair).unwrap();
-    uwrite!(&mut W, "{:#?}", pair).unwrap();
-
-    let first = pair;
-    let second = pair;
-    uwrite!(&mut W, "{:?}", Nested { first, second }).unwrap();
-    uwrite!(&mut W, "{:#?}", Nested { first, second }).unwrap();
-}
-
-// ..
+    assert_eq!("hello",    uformat!(100, "{}", "hello").unwrap().as_str());
+    assert_eq!("  true  ", uformat!(100, "{:^8}", true).unwrap().as_str());
+    assert_eq!("c       ", uformat!(100, "{:<8}", 'c').unwrap().as_str());
 ```

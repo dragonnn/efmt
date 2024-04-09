@@ -1,21 +1,43 @@
 #[macro_export]
-macro_rules! uformat {
-    ($($tt:tt)*) => {{
-        let mut s = String::new();
-        #[allow(unreachable_code)]
-        match ufmt::uwrite!(&mut s, $($tt)*) {
-            Ok(_) => Ok(s),
-            Err(e) => Err(e),
-        }
-    }};
-}
-
-#[macro_export]
+#[cfg(not(feature = "std"))]
 macro_rules! cmp {
     ($($tt:tt)*) => {
         assert_eq!(
-            uformat!($($tt)*),
-            Ok(format!($($tt)*)),
+            sfmt::uformat!(500, $($tt)*).unwrap().as_str(),
+            format!($($tt)*).as_str(),
+        )
+    }
+}
+
+#[macro_export]
+#[cfg(feature = "std")]
+macro_rules! cmp {
+    ($($tt:tt)*) => {
+        assert_eq!(
+            sfmt::uformat!($($tt)*).unwrap().as_str(),
+            format!($($tt)*).as_str(),
+        )
+    }
+}
+
+#[macro_export]
+#[cfg(not(feature = "std"))]
+macro_rules! cmp_str {
+    ($s: expr, $($tt:tt)*) => {
+        assert_eq!(
+            sfmt::uformat!(500, $($tt)*).unwrap().as_str(),
+            $s,
+        )
+    }
+}
+
+#[macro_export]
+#[cfg(feature = "std")]
+macro_rules! cmp_str {
+    ($s: expr, $($tt:tt)*) => {
+        assert_eq!(
+            sfmt::uformat!($($tt)*).unwrap().as_str(),
+            $s,
         )
     }
 }
