@@ -1,6 +1,6 @@
-A small, fast and panic-free alternative to core::fmt
+A tiny, fast and panic-free alternative to core::fmt
 
-The basis for the development of sfmt is [japaric's ufmt](https://github.com/japaric/ufmt).
+The basis for the development of tfmt is [japaric's ufmt](https://github.com/japaric/ufmt).
 
 # Design goals
 - Optimised for size and speed for small embedded systems
@@ -22,7 +22,7 @@ The basis for the development of sfmt is [japaric's ufmt](https://github.com/jap
 # Formatting Examples
 
 ```rust
-    use sfmt::uformat;
+    use tfmt::uformat;
 
     assert_eq!(
         "The answer to everything is 42", 

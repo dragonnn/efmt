@@ -1,7 +1,7 @@
 // This example shows the use of the uDisplayFormatted trait. As a result, the data point can be
 // used flexibly with the choice of leading zeros and the number of decimal places.
 
-use sfmt::{uDisplayFormatted, uformat, Convert};
+use tfmt::{uDisplayFormatted, uformat, Convert};
 use std::f64::consts::PI;
 
 struct Coord(f64);
@@ -9,15 +9,15 @@ struct Coord(f64);
 impl uDisplayFormatted for Coord {
     fn fmt_formatted<W>(
         &self,
-        fmt: &mut sfmt::Formatter<'_, W>,
+        fmt: &mut tfmt::Formatter<'_, W>,
         _prefix: bool,
         cmd: char,
-        padding: sfmt::Padding,
+        padding: tfmt::Padding,
         pad_char: char,
         decimal_places: usize,
     ) -> Result<(), W::Error>
     where
-        W: sfmt::uWrite + ?Sized,
+        W: tfmt::uWrite + ?Sized,
     {
         let (sign, rad) = match cmd {
             'E' => {

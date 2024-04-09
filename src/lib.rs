@@ -28,7 +28,7 @@ macro_rules! uformat {
     ($cap:expr, $($tt:tt)*) => {{
         let mut s = heapless::String::<$cap>::new();
         #[allow(unreachable_code)]
-        match sfmt::uwrite!(&mut s, $($tt)*) {
+        match tfmt::uwrite!(&mut s, $($tt)*) {
             Ok(_) => Ok(s),
             Err(e) => Err(e),
         }
@@ -42,7 +42,7 @@ macro_rules! uformat {
     ($($tt:tt)*) => {{
         let mut s = String::new();
         #[allow(unreachable_code)]
-        match sfmt::uwrite!(&mut s, $($tt)*) {
+        match tfmt::uwrite!(&mut s, $($tt)*) {
             Ok(_) => Ok(s),
             Err(e) => Err(e),
         }

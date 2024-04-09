@@ -109,7 +109,7 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
 
             match piece {
                 Piece::Display => {
-                    exprs.push(quote!(sfmt::uDisplay::fmt(#pat, f)?;));
+                    exprs.push(quote!(tfmt::uDisplay::fmt(#pat, f)?;));
                 }
                 Piece::Str(_) => unreachable!(),
                 Piece::Float {
@@ -118,31 +118,31 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
                     alignment: format,
                     behind,
                 } => match format {
-                    Alignment::Left => exprs.push(quote!(sfmt::uDisplayFloat::fmt_float(
+                    Alignment::Left => exprs.push(quote!(tfmt::uDisplayFloat::fmt_float(
                                 #pat, 
                                 f,
-                                sfmt::Padding::LeftAligned(#pad_length),
+                                tfmt::Padding::LeftAligned(#pad_length),
                                 #pad_char,
                                 #behind,
                             )?;)),
-                    Alignment::Right => exprs.push(quote!(sfmt::uDisplayFloat::fmt_float(
+                    Alignment::Right => exprs.push(quote!(tfmt::uDisplayFloat::fmt_float(
                                 #pat, 
                                 f, 
-                                sfmt::Padding::RightAligned(#pad_length),
+                                tfmt::Padding::RightAligned(#pad_length),
                                 #pad_char,
                                 #behind,
                             )?;)),
-                    Alignment::Center => exprs.push(quote!(sfmt::uDisplayFloat::fmt_float(
+                    Alignment::Center => exprs.push(quote!(tfmt::uDisplayFloat::fmt_float(
                                 #pat, 
                                 f, 
-                                sfmt::Padding::CenterAligned(#pad_length),
+                                tfmt::Padding::CenterAligned(#pad_length),
                                 #pad_char,
                                 #behind,
                             )?;)),
-                    Alignment::Usual => exprs.push(quote!(sfmt::uDisplayFloat::fmt_float(
+                    Alignment::Usual => exprs.push(quote!(tfmt::uDisplayFloat::fmt_float(
                                 #pat, 
                                 f, 
-                                sfmt::Padding::Usual(#pad_length),
+                                tfmt::Padding::Usual(#pad_length),
                                 #pad_char,
                                 #behind,
                             )?;)),
@@ -155,39 +155,39 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
                     alignment: format,
                     behind,
                 } => match format {
-                    Alignment::Left => exprs.push(quote!(sfmt::uDisplayFormatted::fmt_formatted(
+                    Alignment::Left => exprs.push(quote!(tfmt::uDisplayFormatted::fmt_formatted(
                                 #pat, 
                                 f,
                                 #prefix,
                                 #cmd,
-                                sfmt::Padding::LeftAligned(#pad_length),
+                                tfmt::Padding::LeftAligned(#pad_length),
                                 #pad_char,
                                 #behind,
                             )?;)),
-                    Alignment::Right => exprs.push(quote!(sfmt::uDisplayFormatted::fmt_formatted(
+                    Alignment::Right => exprs.push(quote!(tfmt::uDisplayFormatted::fmt_formatted(
                                 #pat, 
                                 f, 
                                 #prefix,
                                 #cmd,
-                                sfmt::Padding::RightAligned(#pad_length),
+                                tfmt::Padding::RightAligned(#pad_length),
                                 #pad_char,
                                 #behind,
                             )?;)),
-                    Alignment::Center => exprs.push(quote!(sfmt::uDisplayFormatted::fmt_formatted(
+                    Alignment::Center => exprs.push(quote!(tfmt::uDisplayFormatted::fmt_formatted(
                                 #pat, 
                                 f, 
                                 #prefix,
                                 #cmd,
-                                sfmt::Padding::CenterAligned(#pad_length),
+                                tfmt::Padding::CenterAligned(#pad_length),
                                 #pad_char,
                                 #behind,
                             )?;)),
-                    Alignment::Usual => exprs.push(quote!(sfmt::uDisplayFormatted::fmt_formatted(
+                    Alignment::Usual => exprs.push(quote!(tfmt::uDisplayFormatted::fmt_formatted(
                                 #pat, 
                                 f, 
                                 #prefix,
                                 #cmd,
-                                sfmt::Padding::Usual(#pad_length),
+                                tfmt::Padding::Usual(#pad_length),
                                 #pad_char,
                                 #behind,
                             )?;)),
@@ -199,36 +199,36 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
                     pad_char,
                     alignment: format,
                 } => match format {
-                    Alignment::Left => exprs.push(quote!(sfmt::uDisplayHex::fmt_hex(
+                    Alignment::Left => exprs.push(quote!(tfmt::uDisplayHex::fmt_hex(
                                 #pat, 
                                 f,
                                 #prefix,
                                 #cmd,
-                                sfmt::Padding::LeftAligned(#pad_length),
+                                tfmt::Padding::LeftAligned(#pad_length),
                                 #pad_char,
                             )?;)),
-                    Alignment::Right => exprs.push(quote!(sfmt::uDisplayHex::fmt_hex(
+                    Alignment::Right => exprs.push(quote!(tfmt::uDisplayHex::fmt_hex(
                                 #pat, 
                                 f, 
                                 #prefix,
                                 #cmd,
-                                sfmt::Padding::RightAligned(#pad_length),
+                                tfmt::Padding::RightAligned(#pad_length),
                                 #pad_char,
                             )?;)),
-                    Alignment::Center => exprs.push(quote!(sfmt::uDisplayHex::fmt_hex(
+                    Alignment::Center => exprs.push(quote!(tfmt::uDisplayHex::fmt_hex(
                                 #pat, 
                                 f, 
                                 #prefix,
                                 #cmd,
-                                sfmt::Padding::CenterAligned(#pad_length),
+                                tfmt::Padding::CenterAligned(#pad_length),
                                 #pad_char,
                             )?;)),
-                    Alignment::Usual => exprs.push(quote!(sfmt::uDisplayHex::fmt_hex(
+                    Alignment::Usual => exprs.push(quote!(tfmt::uDisplayHex::fmt_hex(
                                 #pat, 
                                 f, 
                                 #prefix,
                                 #cmd,
-                                sfmt::Padding::Usual(#pad_length),
+                                tfmt::Padding::Usual(#pad_length),
                                 #pad_char,
                             )?;)),
                 },
@@ -237,28 +237,28 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
                     pad_char,
                     alignment: format,
                 } => match format {
-                    Alignment::Left => exprs.push(quote!(sfmt::uDisplayPadded::fmt_padded(
+                    Alignment::Left => exprs.push(quote!(tfmt::uDisplayPadded::fmt_padded(
                                 #pat, 
                                 f,
-                                sfmt::Padding::LeftAligned(#pad_length),
+                                tfmt::Padding::LeftAligned(#pad_length),
                                 #pad_char,
                             )?;)),
-                    Alignment::Right => exprs.push(quote!(sfmt::uDisplayPadded::fmt_padded(
+                    Alignment::Right => exprs.push(quote!(tfmt::uDisplayPadded::fmt_padded(
                                 #pat, 
                                 f, 
-                                sfmt::Padding::RightAligned(#pad_length),
+                                tfmt::Padding::RightAligned(#pad_length),
                                 #pad_char,
                             )?;)),
-                    Alignment::Center => exprs.push(quote!(sfmt::uDisplayPadded::fmt_padded(
+                    Alignment::Center => exprs.push(quote!(tfmt::uDisplayPadded::fmt_padded(
                                 #pat, 
                                 f, 
-                                sfmt::Padding::CenterAligned(#pad_length),
+                                tfmt::Padding::CenterAligned(#pad_length),
                                 #pad_char,
                             )?;)),
-                    Alignment::Usual => exprs.push(quote!(sfmt::uDisplayPadded::fmt_padded(
+                    Alignment::Usual => exprs.push(quote!(tfmt::uDisplayPadded::fmt_padded(
                                 #pat, 
                                 f, 
-                                sfmt::Padding::Usual(#pad_length),
+                                tfmt::Padding::Usual(#pad_length),
                                 #pad_char,
                             )?;)),
                 },
@@ -268,7 +268,7 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
 
     quote!(match (#(#args),*) {
         (#(#pats),*) => {
-            use sfmt::UnstableDoAsFormatter as _;
+            use tfmt::UnstableDoAsFormatter as _;
 
             (#formatter).do_as_formatter(|f| {
                 #(#exprs)*

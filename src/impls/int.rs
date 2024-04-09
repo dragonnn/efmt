@@ -222,7 +222,7 @@ impl<const CAP: usize> Convert<CAP> {
     /// Converts a u32 number into a string
     ///
     /// ```
-    ///     use sfmt::Convert;
+    ///     use tfmt::Convert;
     ///
     ///     let conv = Convert::<20>::u32(4711).unwrap();
     ///     assert_eq!("4711", conv.as_str());
@@ -237,7 +237,7 @@ impl<const CAP: usize> Convert<CAP> {
     /// Converts a u32 number into a padded string with the specified len
     ///
     /// ```
-    ///     use sfmt::Convert;
+    ///     use tfmt::Convert;
     ///
     ///     let conv = Convert::<20>::u32_pad(4711, 6, '0').unwrap();
     ///     assert_eq!("004711", conv.as_str());
@@ -268,7 +268,7 @@ impl<const CAP: usize> Convert<CAP> {
     /// Converts a i32 number into a string
     ///
     /// ```
-    ///     use sfmt::Convert;
+    ///     use tfmt::Convert;
     ///
     ///     let conv = Convert::<20>::i32(-4711).unwrap();
     ///     assert_eq!("-4711", conv.as_str());
@@ -283,7 +283,7 @@ impl<const CAP: usize> Convert<CAP> {
     /// Converts a i32 number into a padded string with the specified len
     ///
     /// ```
-    ///     use sfmt::Convert;
+    ///     use tfmt::Convert;
     ///
     ///     let conv = Convert::<20>::i32_pad(-4711, 6, ' ').unwrap();
     ///     assert_eq!(" -4711", conv.as_str());

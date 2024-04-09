@@ -1,14 +1,14 @@
 [package]
 authors = ["Jorge Aparicio <jorge@japaric.io>", "Winfried Simon <winfried.simon@gmail.com"]
 categories = ["embedded", "no-std"]
-description = "A small, fast and panic-free alternative to `core::fmt`"
+description = "A tiny, fast and panic-free alternative to `core::fmt`"
 documentation = "https://docs.rs/nfmt"
 edition = "2021"
 keywords = ["Debug", "Display", "Write", "format"]
 license = "MIT OR Apache-2.0"
-name = "sfmt"
+name = "tfmt"
 readme = "README.md"
-repository = "https://github.com/simsys/sfmt"
+repository = "https://github.com/simsys/tfmt"
 version = "0.1.0"
 
 [dependencies]

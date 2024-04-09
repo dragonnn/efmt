@@ -3,7 +3,7 @@
 macro_rules! cmp {
     ($($tt:tt)*) => {
         assert_eq!(
-            sfmt::uformat!(500, $($tt)*).unwrap().as_str(),
+            tfmt::uformat!(500, $($tt)*).unwrap().as_str(),
             format!($($tt)*).as_str(),
         )
     }
@@ -14,7 +14,7 @@ macro_rules! cmp {
 macro_rules! cmp {
     ($($tt:tt)*) => {
         assert_eq!(
-            sfmt::uformat!($($tt)*).unwrap().as_str(),
+            tfmt::uformat!($($tt)*).unwrap().as_str(),
             format!($($tt)*).as_str(),
         )
     }
@@ -25,7 +25,7 @@ macro_rules! cmp {
 macro_rules! cmp_str {
     ($s: expr, $($tt:tt)*) => {
         assert_eq!(
-            sfmt::uformat!(500, $($tt)*).unwrap().as_str(),
+            tfmt::uformat!(500, $($tt)*).unwrap().as_str(),
             $s,
         )
     }
@@ -36,7 +36,7 @@ macro_rules! cmp_str {
 macro_rules! cmp_str {
     ($s: expr, $($tt:tt)*) => {
         assert_eq!(
-            sfmt::uformat!($($tt)*).unwrap().as_str(),
+            tfmt::uformat!($($tt)*).unwrap().as_str(),
             $s,
         )
     }

@@ -1,6 +1,6 @@
 mod macros;
 
-use sfmt::uwriteln;
+use tfmt::uwriteln;
 
 #[test]
 fn aligned() {

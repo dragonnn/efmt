@@ -79,7 +79,7 @@ impl<const CAP: usize> Convert<CAP> {
     /// Converts a f64 number into a string with the specified precision
     ///
     /// ```
-    ///     use sfmt::Convert;
+    ///     use tfmt::Convert;
     ///
     ///     let conv = Convert::<20>::f64(3.14159265359, 4).unwrap();
     ///     assert_eq!("3.1416", conv.as_str());
@@ -109,7 +109,7 @@ impl<const CAP: usize> Convert<CAP> {
     /// is aligned to the right.
     ///
     /// ```
-    ///     use sfmt::Convert;
+    ///     use tfmt::Convert;
     ///
     ///     let conv = Convert::<20>::f64_pad(3.14159265359, 7, 3, '0').unwrap();
     ///     assert_eq!("003.142", conv.as_str());

@@ -7,7 +7,7 @@ version = "0.0.0"
 
 [dependencies]
 panic-never = "0.1.0"
-sfmt = { path = "../.." }
+tfmt = { path = "../.." }
 
 [profile.release]
 codegen-units = 1
