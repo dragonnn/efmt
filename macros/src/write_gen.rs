@@ -1,4 +1,5 @@
 use proc_macro::TokenStream;
+use proc_macro2::TokenStream as TokenStream2;
 use std::cmp::Ordering;
 
 use crate::{
@@ -122,153 +123,67 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
                 Piece::Float {
                     pad_length,
                     pad_char,
-                    alignment: format,
+                    alignment,
                     behind,
-                } => match format {
-                    Alignment::Left => exprs.push(quote!(tfmt::uDisplayFloat::fmt_float(
-                                #pat, 
-                                f,
-                                tfmt::Padding::LeftAligned(#pad_length),
-                                #pad_char,
-                                #behind,
-                            )?;)),
-                    Alignment::Right => exprs.push(quote!(tfmt::uDisplayFloat::fmt_float(
-                                #pat, 
-                                f, 
-                                tfmt::Padding::RightAligned(#pad_length),
-                                #pad_char,
-                                #behind,
-                            )?;)),
-                    Alignment::Center => exprs.push(quote!(tfmt::uDisplayFloat::fmt_float(
-                                #pat, 
-                                f, 
-                                tfmt::Padding::CenterAligned(#pad_length),
-                                #pad_char,
-                                #behind,
-                            )?;)),
-                    Alignment::Usual => exprs.push(quote!(tfmt::uDisplayFloat::fmt_float(
-                                #pat, 
-                                f, 
-                                tfmt::Padding::Usual(#pad_length),
-                                #pad_char,
-                                #behind,
-                            )?;)),
-                },
+                } => {
+                    let alignment = get_alignment(alignment, pad_length);
+                    exprs.push(quote!(tfmt::uDisplayFloat::fmt_float(
+                        #pat, 
+                        f,
+                        #alignment,
+                        #pad_char,
+                        #behind,
+                    )?;));
+                }
                 Piece::Formatted {
                     prefix,
                     cmd,
                     pad_length,
                     pad_char,
-                    alignment: format,
+                    alignment,
                     behind,
-                } => match format {
-                    Alignment::Left => exprs.push(quote!(tfmt::uDisplayFormatted::fmt_formatted(
-                                #pat, 
-                                f,
-                                #prefix,
-                                #cmd,
-                                tfmt::Padding::LeftAligned(#pad_length),
-                                #pad_char,
-                                #behind,
-                            )?;)),
-                    Alignment::Right => exprs.push(quote!(tfmt::uDisplayFormatted::fmt_formatted(
-                                #pat, 
-                                f, 
-                                #prefix,
-                                #cmd,
-                                tfmt::Padding::RightAligned(#pad_length),
-                                #pad_char,
-                                #behind,
-                            )?;)),
-                    Alignment::Center => exprs.push(quote!(tfmt::uDisplayFormatted::fmt_formatted(
-                                #pat, 
-                                f, 
-                                #prefix,
-                                #cmd,
-                                tfmt::Padding::CenterAligned(#pad_length),
-                                #pad_char,
-                                #behind,
-                            )?;)),
-                    Alignment::Usual => exprs.push(quote!(tfmt::uDisplayFormatted::fmt_formatted(
-                                #pat, 
-                                f, 
-                                #prefix,
-                                #cmd,
-                                tfmt::Padding::Usual(#pad_length),
-                                #pad_char,
-                                #behind,
-                            )?;)),
-                },
+                } => {
+                    let alignment = get_alignment(alignment, pad_length);
+                    exprs.push(quote!(tfmt::uDisplayFormatted::fmt_formatted(
+                        #pat, 
+                        f,
+                        #prefix,
+                        #cmd,
+                        #alignment,
+                        #pad_char,
+                        #behind,
+                    )?;));
+                }
                 Piece::Hex {
                     prefix,
                     cmd,
                     pad_length,
                     pad_char,
-                    alignment: format,
-                } => match format {
-                    Alignment::Left => exprs.push(quote!(tfmt::uDisplayHex::fmt_hex(
-                                #pat, 
-                                f,
-                                #prefix,
-                                #cmd,
-                                tfmt::Padding::LeftAligned(#pad_length),
-                                #pad_char,
-                            )?;)),
-                    Alignment::Right => exprs.push(quote!(tfmt::uDisplayHex::fmt_hex(
-                                #pat, 
-                                f, 
-                                #prefix,
-                                #cmd,
-                                tfmt::Padding::RightAligned(#pad_length),
-                                #pad_char,
-                            )?;)),
-                    Alignment::Center => exprs.push(quote!(tfmt::uDisplayHex::fmt_hex(
-                                #pat, 
-                                f, 
-                                #prefix,
-                                #cmd,
-                                tfmt::Padding::CenterAligned(#pad_length),
-                                #pad_char,
-                            )?;)),
-                    Alignment::Usual => exprs.push(quote!(tfmt::uDisplayHex::fmt_hex(
-                                #pat, 
-                                f, 
-                                #prefix,
-                                #cmd,
-                                tfmt::Padding::Usual(#pad_length),
-                                #pad_char,
-                            )?;)),
-                },
+                    alignment,
+                } => {
+                    let alignment = get_alignment(alignment, pad_length);
+                    exprs.push(quote!(tfmt::uDisplayHex::fmt_hex(
+                        #pat, 
+                        f,
+                        #prefix,
+                        #cmd,
+                        #alignment,
+                        #pad_char,
+                    )?;));
+                }
                 Piece::Padded {
                     pad_length,
                     pad_char,
-                    alignment: format,
-                } => match format {
-                    Alignment::Left => exprs.push(quote!(tfmt::uDisplayPadded::fmt_padded(
-                                #pat, 
-                                f,
-                                tfmt::Padding::LeftAligned(#pad_length),
-                                #pad_char,
-                            )?;)),
-                    Alignment::Right => exprs.push(quote!(tfmt::uDisplayPadded::fmt_padded(
-                                #pat, 
-                                f, 
-                                tfmt::Padding::RightAligned(#pad_length),
-                                #pad_char,
-                            )?;)),
-                    Alignment::Center => exprs.push(quote!(tfmt::uDisplayPadded::fmt_padded(
-                                #pat, 
-                                f, 
-                                tfmt::Padding::CenterAligned(#pad_length),
-                                #pad_char,
-                            )?;)),
-                    Alignment::Usual => exprs.push(quote!(tfmt::uDisplayPadded::fmt_padded(
-                                #pat, 
-                                f, 
-                                tfmt::Padding::Usual(#pad_length),
-                                #pad_char,
-                            )?;)),
-                },
+                    alignment,
+                } => {
+                    let alignment = get_alignment(alignment, pad_length);
+                    exprs.push(quote!(tfmt::uDisplayPadded::fmt_padded(
+                        #pat, 
+                        f,
+                        #alignment,
+                        #pad_char,
+                    )?;))
+                }
             }
         }
     }
@@ -284,4 +199,14 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
         }
     })
     .into()
+}
+
+
+fn get_alignment(alignment: Alignment, pad_length: usize) -> TokenStream2 {
+    match alignment {
+        Alignment::Left => quote!(tfmt::Padding::LeftAligned(#pad_length)),
+        Alignment::Right => quote!(tfmt::Padding::RightAligned(#pad_length)),
+        Alignment::Center => quote!(tfmt::Padding::CenterAligned(#pad_length)),
+        Alignment::Usual => quote!(tfmt::Padding::Usual(#pad_length)),
+    }
 }
