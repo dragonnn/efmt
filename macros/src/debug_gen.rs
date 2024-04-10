@@ -16,7 +16,7 @@ pub fn debug_gen(input: TokenStream) -> TokenStream {
 
     for param in &mut generics.params {
         if let GenericParam::Type(type_param) = param {
-            type_param.bounds.push(parse_quote!(ufmt::uDebug));
+            type_param.bounds.push(parse_quote!(tfmt::uDebug));
         }
     }
 
@@ -59,10 +59,10 @@ pub fn debug_gen(input: TokenStream) -> TokenStream {
             };
 
             quote!(
-                impl #impl_generics ufmt::uDebug for #ident #ty_generics #where_clause {
-                    fn fmt<W>(&self, f: &mut ufmt::Formatter<'_, W>) -> core::result::Result<(), W::Error>
+                impl #impl_generics tfmt::uDebug for #ident #ty_generics #where_clause {
+                    fn fmt<W>(&self, f: &mut tfmt::Formatter<'_, W>) -> core::result::Result<(), W::Error>
                     where
-                        W: ufmt::uWrite + ?Sized,
+                        W: tfmt::uWrite + ?Sized,
                     {
                         #body
                     }
@@ -131,10 +131,10 @@ pub fn debug_gen(input: TokenStream) -> TokenStream {
             };
 
             quote!(
-                impl #impl_generics ufmt::uDebug for #ident #ty_generics #where_clause {
-                    fn fmt<W>(&self, f: &mut ufmt::Formatter<'_, W>) -> core::result::Result<(), W::Error>
+                impl #impl_generics tfmt::uDebug for #ident #ty_generics #where_clause {
+                    fn fmt<W>(&self, f: &mut tfmt::Formatter<'_, W>) -> core::result::Result<(), W::Error>
                         where
-                        W: ufmt::uWrite + ?Sized,
+                        W: tfmt::uWrite + ?Sized,
                     {
                         #body
                     }

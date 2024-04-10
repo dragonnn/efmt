@@ -88,6 +88,19 @@ impl uDisplayPadded for &str {
     }
 }
 
+impl<T> uDebug for &'_ T
+where
+    T: uDebug + ?Sized,
+{
+    #[inline(always)]
+    fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        <T as uDebug>::fmt(self, f)
+    }
+}
+
 impl<T> uDisplay for &'_ T
 where
     T: uDisplay + ?Sized,
@@ -101,6 +114,19 @@ where
     }
 }
 
+impl<T> uDebug for &'_ mut T
+where
+    T: uDebug + ?Sized,
+{
+    #[inline(always)]
+    fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        <T as uDebug>::fmt(self, f)
+    }
+}
+
 impl<T> uDisplay for &'_ mut T
 where
     T: uDisplay + ?Sized,
@@ -111,5 +137,36 @@ where
         W: uWrite + ?Sized,
     {
         <T as uDisplay>::fmt(self, f)
+    }
+}
+
+impl<T> uDebug for Option<T>
+where
+    T: uDebug,
+{
+    fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        match self {
+            None => f.write_str("None"),
+            Some(x) => f.debug_tuple("Some")?.field(x)?.finish(),
+        }
+    }
+}
+
+impl<T, E> uDebug for Result<T, E>
+where
+    T: uDebug,
+    E: uDebug,
+{
+    fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        match self {
+            Err(e) => f.debug_tuple("Err")?.field(e)?.finish(),
+            Ok(x) => f.debug_tuple("Ok")?.field(x)?.finish(),
+        }
     }
 }

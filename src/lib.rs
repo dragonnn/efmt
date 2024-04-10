@@ -3,7 +3,12 @@
 
 mod impls;
 mod utils;
+mod helpers;
 use core::{slice::from_raw_parts, str::from_utf8_unchecked};
+pub mod derive {
+    pub use tfmt_macros::uDebug;
+}
+
 #[doc(hidden)]
 pub use utils::{uDisplayFloat, uDisplayHex, UnstableDoAsFormatter};
 
@@ -18,6 +23,16 @@ pub trait uWrite {
     /// This method can only succeed if the entire string slice was successfully written, and this
     /// method will not return until all data has been written or an error occurs.
     fn write_str(&mut self, s: &str) -> Result<(), Self::Error>;
+
+    /// Writes a [`char`] into this writer, returning whether the write succeeded.
+    ///
+    /// A single [`char`] may be encoded as more than one byte. This method can only succeed if the
+    /// entire byte sequence was successfully written, and this method will not return until all
+    /// data has been written or an error occurs.
+    fn write_char(&mut self, c: char) -> Result<(), Self::Error> {
+        let mut buf: [u8; 4] = [0; 4];
+        self.write_str(c.encode_utf8(&mut buf))
+    }
 }
 
 /// Creates a `String` using interpolation of runtime expressions.
@@ -151,6 +166,8 @@ where
     W: uWrite + ?Sized,
 {
     writer: &'w mut W,
+    indentation: usize,
+    pretty: bool,
 }
 
 impl<'w, W> Formatter<'w, W>
@@ -159,7 +176,7 @@ where
 {
     /// Creates a formatter from the given writer
     pub fn new(writer: &'w mut W) -> Self {
-        Self { writer }
+        Self { writer, indentation: 0, pretty: false }
     }
 
     /// Writes a character to the underlying buffer contained within this formatter.
@@ -176,15 +193,22 @@ where
 
     /// Execute the closure with pretty-printing enabled
     pub fn pretty(&mut self, f: impl FnOnce(&mut Self) -> Result<(), W::Error>) -> Result<(), W::Error> {
-        //let pretty = self.pretty;
-        //self.pretty = true;
-        self.writer.write_str(" # ")?; // TODO: implement prettty
+        let pretty = self.pretty;
+        self.pretty = true;
         f(self)?;
-        //self.pretty = pretty;
+        self.pretty = pretty;
         Ok(())
     }
     
-    
+    /// Write whitespace according to the current `self.indentation`
+    fn indent(&mut self) -> Result<(), W::Error> {
+        for _ in 0..self.indentation {
+            self.write_str("    ")?;
+        }
+
+        Ok(())
+    }
+
     /// Writes a string slice to the underlying buffer and fills it with the pad_char according to
     /// the padding specifications. Here, `Padding::Usual` is treated in the same way as
     /// `Padding::RightAligned`.
