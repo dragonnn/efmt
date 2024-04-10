@@ -1,4 +1,4 @@
-//! `nfmt` macros
+//! `tfmt` macros
 
 extern crate proc_macro;
 

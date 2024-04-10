@@ -1,12 +1,12 @@
 [package]
 authors = ["Jorge Aparicio <jorge@japaric.io>", "Winfried Simon <winfried.simon@gmail.com"]
 categories = ["embedded", "no-std"]
-description = "`nfmt` macros"
+description = "`tfmt` macros"
 edition = "2021"
 keywords = ["Debug", "Display", "Write", "format"]
 license = "MIT OR Apache-2.0"
-name = "nfmt-macros"
-repository = "https://github.com/simsys/nfmt"
+name = "tfmt-macros"
+repository = "https://github.com/simsys/tfmt"
 version = "0.1.0"
 
 [lib]

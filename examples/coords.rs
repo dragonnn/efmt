@@ -1,8 +1,8 @@
 // This example shows the use of the uDisplayFormatted trait. As a result, the data point can be
 // used flexibly with the choice of leading zeros and the number of decimal places.
 
-use tfmt::{uDisplayFormatted, uformat, Convert};
 use std::f64::consts::PI;
+use tfmt::{uDisplayFormatted, uformat, Convert};
 
 struct Coord(f64);
 

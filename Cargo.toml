@@ -2,7 +2,7 @@
 authors = ["Jorge Aparicio <jorge@japaric.io>", "Winfried Simon <winfried.simon@gmail.com"]
 categories = ["embedded", "no-std"]
 description = "A tiny, fast and panic-free alternative to `core::fmt`"
-documentation = "https://docs.rs/nfmt"
+documentation = "https://docs.rs/tfmt"
 edition = "2021"
 keywords = ["Debug", "Display", "Write", "format"]
 license = "MIT OR Apache-2.0"
@@ -12,7 +12,7 @@ repository = "https://github.com/simsys/tfmt"
 version = "0.1.0"
 
 [dependencies]
-nfmt-macros = { path = "macros", version = "0.1.0" }
+tfmt-macros = { path = "macros", version = "0.1.0" }
 heapless = "0.8.0"
 
 # Do not set the std feature to default
