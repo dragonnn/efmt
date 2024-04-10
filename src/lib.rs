@@ -71,6 +71,23 @@ macro_rules! uformat {
     }};
 }
 
+/// Documentation
+#[macro_export]
+macro_rules! udisplay_as_udebug {
+    ($type: ty) => {
+        impl uDebug for $type {
+            #[inline(always)]
+            fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+            where
+                W: uWrite + ?Sized,
+            {
+                <$type as uDisplay>::fmt(self, f)
+            }
+        }
+    }
+}
+
+
 /// Write formatted data into a buffer
 /// 
 /// This macro accepts a format string, a list of arguments, and a 'writer'. Arguments will be
@@ -157,6 +174,17 @@ where
         self.writer.write_str(s)
     }
 
+    /// Execute the closure with pretty-printing enabled
+    pub fn pretty(&mut self, f: impl FnOnce(&mut Self) -> Result<(), W::Error>) -> Result<(), W::Error> {
+        //let pretty = self.pretty;
+        //self.pretty = true;
+        self.writer.write_str(" # ")?; // TODO: implement prettty
+        f(self)?;
+        //self.pretty = pretty;
+        Ok(())
+    }
+    
+    
     /// Writes a string slice to the underlying buffer and fills it with the pad_char according to
     /// the padding specifications. Here, `Padding::Usual` is treated in the same way as
     /// `Padding::RightAligned`.
@@ -204,6 +232,15 @@ where
 /// See [uwrite] for details
 #[allow(non_camel_case_types)]
 pub trait uDisplay {
+    /// Formats the value using the given formatter
+    fn fmt<W>(&self, _: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized;
+}
+
+/// Just like `core::fmt::Debug`
+#[allow(non_camel_case_types)]
+pub trait uDebug {
     /// Formats the value using the given formatter
     fn fmt<W>(&self, _: &mut Formatter<'_, W>) -> Result<(), W::Error>
     where

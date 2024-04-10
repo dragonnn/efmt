@@ -108,6 +108,13 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
             pats.push(quote!(#pat));
 
             match piece {
+                Piece::Debug(pretty) => {
+                    exprs.push(if pretty {
+                        quote!(f.pretty(|f| tfmt::uDebug::fmt(#pat, f))?;)
+                    } else {
+                        quote!(tfmt::uDebug::fmt(#pat, f)?;)
+                    });
+                }
                 Piece::Display => {
                     exprs.push(quote!(tfmt::uDisplay::fmt(#pat, f)?;));
                 }

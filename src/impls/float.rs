@@ -1,4 +1,4 @@
-use crate::{uDisplay, uDisplayFloat, uWrite, Convert, Formatter, Padding};
+use crate::{uDebug, udisplay_as_udebug, uDisplay, uDisplayFloat, uWrite, Convert, Formatter, Padding};
 
 // max 2**32 4_294_967_296 (10 digits) + 6 digits right dp + '.' + '-' => 18 digits max
 const BUF_LEN: usize = 18;
@@ -35,6 +35,8 @@ impl uDisplay for f32 {
     }
 }
 
+udisplay_as_udebug!(f32);
+
 impl uDisplayFloat for f64 {
     fn fmt_float<W>(
         &self,
@@ -66,6 +68,8 @@ impl uDisplay for f64 {
         Ok(()) // Silently ignore errors during formatting
     }
 }
+
+udisplay_as_udebug!(f64);
 
 impl<const CAP: usize> Convert<CAP> {
     /// Converts a f32 number into a string with the specified precision

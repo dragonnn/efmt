@@ -14,6 +14,7 @@ pub enum Alignment {
 
 #[derive(Debug, PartialEq)]
 pub enum Piece<'a> {
+    Debug(bool),
     Display,
     Str(Cow<'a, str>),
     Float {
@@ -185,7 +186,7 @@ fn parse_colon(format: &str, span: Span) -> syn::parse::Result<(Piece, &str)> {
     }
 
     let (mut ch, cmd) = match ch {
-        '.' | 'A'..='Z' | 'a'..='z' => (chars.next().ok_or(err_piece())?, ch),
+        '.' | '?' | 'A'..='Z' | 'a'..='z' => (chars.next().ok_or(err_piece())?, ch),
         _ => (ch, '*'),
     };
 
@@ -224,6 +225,16 @@ fn parse_colon(format: &str, span: Span) -> syn::parse::Result<(Piece, &str)> {
                         pad_char: pad_char as char,
                         alignment,
                     },
+                    chars.as_str(),
+                ))
+            } else {
+                Err(err_piece())
+            }
+        }
+        '?' => {
+            if pad_length == 0 && behind == 0{
+                Ok((
+                    Piece::Debug(prefix),
                     chars.as_str(),
                 ))
             } else {
@@ -478,6 +489,16 @@ mod tests {
                 pad_char: '0',
                 alignment: Alignment::Center,
             }]),
+        );
+
+        assert_eq!(
+            super::parse("{:?}", span).ok(),
+            Some(vec![Piece::Debug(false)]),
+        );
+
+        assert_eq!(
+            super::parse("{:#?}", span).ok(),
+            Some(vec![Piece::Debug(true)]),
         );
 
         // escaped braces

@@ -3,7 +3,7 @@ mod macros;
 #[test]
 fn uxx_min_max() {
     cmp!("{}", u8::max_value());
-    cmp!("{}", u16::max_value());
+    cmp!("{:?}", u16::max_value());
     cmp!("{}", u32::max_value());
     cmp!("{}", u64::max_value());
     cmp!("{}", u128::max_value());

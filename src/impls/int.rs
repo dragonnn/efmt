@@ -1,4 +1,7 @@
-use crate::{uDisplay, uDisplayHex, uDisplayPadded, uWrite, Convert, Formatter, Padding};
+use crate::{
+    uDisplay, uDebug, udisplay_as_udebug, uDisplayHex, uDisplayPadded, uWrite, Convert, 
+    Formatter, Padding
+};
 use core::{mem::MaybeUninit, slice, str};
 
 macro_rules! hex {
@@ -140,6 +143,13 @@ uxx_trait_impl!(usize, 10);
 #[cfg(target_pointer_width = "64")]
 uxx_trait_impl!(usize, 20);
 
+udisplay_as_udebug!(u8);
+udisplay_as_udebug!(u16);
+udisplay_as_udebug!(u32);
+udisplay_as_udebug!(u64);
+udisplay_as_udebug!(u128);
+udisplay_as_udebug!(usize);
+
 macro_rules! ixx {
     ($uxx:ty, $n:expr, $len:expr) => {{
         let mut buf = [MaybeUninit::<u8>::uninit(); $len];
@@ -216,8 +226,15 @@ ixx_trait_impl!(isize, usize, 11);
 #[cfg(target_pointer_width = "64")]
 ixx_trait_impl!(isize, usize, 21);
 
-// Extend the Convert struct
+udisplay_as_udebug!(i8);
+udisplay_as_udebug!(i16);
+udisplay_as_udebug!(i32);
+udisplay_as_udebug!(i64);
+udisplay_as_udebug!(i128);
+udisplay_as_udebug!(isize);
 
+
+// Extend the Convert struct
 impl<const CAP: usize> Convert<CAP> {
     /// Converts a u32 number into a string
     ///
@@ -316,3 +333,4 @@ impl<const CAP: usize> Convert<CAP> {
         Ok(())
     }
 }
+

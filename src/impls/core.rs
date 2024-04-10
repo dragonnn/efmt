@@ -1,4 +1,4 @@
-use crate::{uDisplay, uDisplayPadded, uWrite, Formatter, Padding};
+use crate::{uDebug, udisplay_as_udebug, uDisplay, uDisplayPadded, uWrite, Formatter, Padding};
 
 impl uDisplay for bool {
     fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
@@ -12,6 +12,8 @@ impl uDisplay for bool {
         }
     }
 }
+
+udisplay_as_udebug!(bool);
 
 impl uDisplayPadded for bool {
     fn fmt_padded<W>(
@@ -38,6 +40,8 @@ impl uDisplay for char {
     }
 }
 
+udisplay_as_udebug!(char);
+
 impl uDisplayPadded for char {
     fn fmt_padded<W>(
         &self,
@@ -63,6 +67,8 @@ impl uDisplay for str {
         f.write_str(self)
     }
 }
+
+udisplay_as_udebug!(str);
 
 impl uDisplayPadded for &str {
     fn fmt_padded<W>(
