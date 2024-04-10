@@ -69,6 +69,13 @@ impl uDisplay for f64 {
 
 impl<const CAP: usize> Convert<CAP> {
     /// Converts a f32 number into a string with the specified precision
+    ///
+    /// ```
+    ///     use tfmt::Convert;
+    ///
+    ///     let conv = Convert::<20>::f32(3.14159265359, 4).unwrap();
+    ///     assert_eq!("3.1416", conv.as_str());
+    /// ```
     pub fn f32(f: f32, decimal_places: usize) -> Result<Self, ()> {
         // SAFETY: The data provided by this function is at the end definitly initialized
         let mut fbuf = unsafe { Self::uninit() };
@@ -92,6 +99,16 @@ impl<const CAP: usize> Convert<CAP> {
     }
 
     /// Converts a f32 number into a string of length len with the specified precision
+    ///
+    /// The digits not occupied by the number are pre-assigned with `pad_char`. The representation
+    /// is aligned to the right.
+    ///
+    /// ```
+    ///     use tfmt::Convert;
+    ///
+    ///     let conv = Convert::<20>::f32_pad(3.14159265359, 7, 3, '0').unwrap();
+    ///     assert_eq!("003.142", conv.as_str());
+    /// ```
     pub fn f32_pad(f: f32, len: usize, decimal_places: usize, pad_char: char) -> Result<Self, ()> {
         if pad_char as u32 >= 0x80 || len > CAP {
             return Err(());

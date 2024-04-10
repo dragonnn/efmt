@@ -19,14 +19,16 @@ The basis for the development of tfmt is [japaric's ufmt](https://github.com/jap
 - [uDisplayFormatted] trait for your own complex formatted outputs
 - [uformat] macro to simply generating strings
 
-# Formatting Examples
+# Examples
+
+### Format Standard Rust Types
 
 ```rust
     use tfmt::uformat;
 
     assert_eq!(
-        "The answer to everything is 42", 
-        uformat!(100, "The answer to {} is {}", "everything", 42).unwrap().as_str()
+        uformat!(100, "The answer to {} is {}", "everything", 42).unwrap().as_str(),
+        "The answer to everything is 42" 
     );
 
     assert_eq!("4711",     uformat!(100, "{}", 4711).unwrap().as_str());
