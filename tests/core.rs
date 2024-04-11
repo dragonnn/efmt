@@ -44,3 +44,23 @@ fn uwriteln() {
     uwriteln!(&mut s, "World",).unwrap();
     assert_eq!(s, "Hello\nWorld\n");
 }
+
+#[test]
+fn option() {
+    cmp!("{:?}", None::<i32>);
+    cmp!("{:#?}", None::<i32>);
+
+    cmp!("{:?}", Some(0));
+    cmp!("{:#?}", Some(0));
+}
+
+#[test]
+fn result() {
+    cmp!("{:?}", Ok::<_, ()>(1));
+    cmp!("{:#?}", Ok::<_, ()>(1));
+
+    cmp!("{:?}", Err::<(), _>(2));
+    cmp!("{:#?}", Err::<(), _>(2));
+}
+
+
