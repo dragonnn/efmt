@@ -334,3 +334,41 @@ impl<const CAP: usize> Convert<CAP> {
     }
 }
 
+impl<T> uDebug for *const T {
+    #[cfg(target_pointer_width = "16")]
+    fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        let s = hex!(u16, *self as u16, false, true);
+        f.write_str(s)
+    }
+
+    #[cfg(target_pointer_width = "32")]
+    fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        let s = hex!(u32, *self as u32, false, true);
+        f.write_str(s)
+    }
+
+    #[cfg(target_pointer_width = "64")]
+    fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        let s = hex!(u64, *self as u64, false, true);
+        f.write_str(s)
+    }
+}
+
+impl<T> uDebug for *mut T {
+    #[inline(always)]
+    fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        (*self as *const T).fmt(f)
+    }
+}
