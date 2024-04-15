@@ -53,14 +53,14 @@ fn main() -> ! {
         let mut s = heapless::String::<100>::new();
         let before = DWT::cycle_count();
 
-        tfmt::uwrite!(&mut s, "{}", u32_).unwrap();
+        //tfmt::uwrite!(&mut s, "{}", u32_).unwrap();
         //core::write!(&mut s, "{}", u32_).unwrap();
 
         //tfmt::uwrite!(&mut s, "{:^20}", u32_).unwrap();
         //core::write!(&mut s, "{:^20}", u32_).unwrap();
 
         //tfmt::uwrite!(&mut s, "{} {} {}", u32_ as u8, u32_ as u16, u32_).unwrap();
-        //core::write!(&mut s, "{} {} {}", u32_ as u8, u32_ as u16, u32_).unwrap();
+        core::write!(&mut s, "{} {} {}", u32_ as u8, u32_ as u16, u32_).unwrap();
 
         //tfmt::uwrite!(&mut s, "{:#x}", u32_).unwrap();
         //core::write!(&mut s, "{:#x}", u32_).unwrap();
