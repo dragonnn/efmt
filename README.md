@@ -13,7 +13,7 @@ The basis for the development of tfmt is [japaric's ufmt](https://github.com/jap
   - i8, i16, i32, i64, i128, isize
   - bool, str, char
   - f32, f64
-- [`#[derive(uDebug)]`][derive]
+- [`#[derive(uDebug)]`][macro@derive]
 - `uDebug` and `uDisplay` traits like [core::fmt::Debug] and [core::fmt::Display]
 - [uDisplayPadded] trait for your own formatted outputs
 - [uDisplayFormatted] trait for your own complex formatted outputs
