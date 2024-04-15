@@ -334,6 +334,8 @@ pub struct Convert<const CAP: usize> {
 impl<const CAP: usize> Convert<CAP> {
     /// Returns a reference to the string contained in Convert
     pub fn as_str(&self) -> &str {
+        // SAFETY: We only return characters here that we have previously initialised. This is 
+        // therefore safe and a new check for utf8 conformity is pointless.
         unsafe {
             let p_buf = self.buf.as_ptr().cast::<u8>();
             let length = CAP - self.idx;
@@ -347,7 +349,9 @@ impl<const CAP: usize> Convert<CAP> {
         if self.idx > 0 {
             let p_buf = self.buf.as_mut_ptr().cast::<u8>();
             self.idx -= 1;
-            unsafe { p_buf.add(self.idx).write(c) };
+            // SAFETY: Since idx >= 0 and below CAP, this access is secure. This construct is 
+            // necessary because rust array accesses generate an undesired panicking branch.
+            unsafe { p_buf.add(self.idx).write_volatile(c) };
             Ok(())
         } else {
             Err(())
@@ -360,13 +364,6 @@ impl<const CAP: usize> Convert<CAP> {
             self.write_char(c)?;
         }
         Ok(())
-    }
-
-    /// Provides non-initialised Convert instance
-    unsafe fn uninit() -> Self {
-        let buf = core::mem::MaybeUninit::<[u8; CAP]>::uninit();
-        let buf = unsafe { buf.assume_init() };
-        Convert { buf, idx: CAP }
     }
 }
 

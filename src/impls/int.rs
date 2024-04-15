@@ -2,11 +2,11 @@ use crate::{
     uDisplay, uDebug, udisplay_as_udebug, uDisplayHex, uDisplayPadded, uWrite, Convert, 
     Formatter, Padding
 };
-use core::{mem::MaybeUninit, slice, str};
+use core::{slice, str};
 
 macro_rules! hex {
     ($utype: ty, $n:expr, $upper: expr, $prefix: expr) => {{
-        let mut buf = [MaybeUninit::<u8>::uninit(); core::mem::size_of::<$utype>() * 2 + 2];
+        let mut buf = [0_u8; core::mem::size_of::<$utype>() * 2 + 2];
         let ptr = &buf.as_mut_ptr().cast::<u8>();
         let len = core::mem::size_of::<$utype>() * 2 + 2;
         let mut n = $n;
@@ -15,7 +15,9 @@ macro_rules! hex {
         loop {
             let val = (n % 16) as u8;
             let d = if val < 10 { b'0' + val } else { c + val - 10 };
-            unsafe { ptr.add(i).write(d) }
+            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is 
+            // necessary because rust array accesses generate an undesired panicking branch.
+            unsafe { ptr.add(i).write_volatile(d) }
 
             n /= 16;
             if n == 0 {
@@ -26,17 +28,23 @@ macro_rules! hex {
         }
         if $prefix {
             i -= 1;
-            unsafe { ptr.add(i).write(b'x') }
+            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is 
+            // necessary because rust array accesses generate an undesired panicking branch.
+            unsafe { ptr.add(i).write_volatile(b'x') }
             i -= 1;
-            unsafe { ptr.add(i).write(b'0') }
+            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is 
+            // necessary because rust array accesses generate an undesired panicking branch.
+            unsafe { ptr.add(i).write_volatile(b'0') }
         }
 
+        // SAFETY: We only return characters here that we have previously initialised. This is 
+        // therefore safe and a new check for utf8 conformity is pointless.
         unsafe { str::from_utf8_unchecked(slice::from_raw_parts(ptr.add(i), len - i)) }
     }};
 }
 
 macro_rules! hex_trait_impl {
-    ($type: ty, $utype: ty) => {
+    ($type: ty, $u_type: ty) => {
         impl uDisplayHex for $type {
             fn fmt_hex<W>(
                 &self,
@@ -49,7 +57,7 @@ macro_rules! hex_trait_impl {
             where
                 W: uWrite + ?Sized,
             {
-                let s = hex!($utype, *self as $utype, cmd == 'X', prefix);
+                let s = hex!($u_type, *self as $u_type, cmd == 'X', prefix);
                 fmt.write_padded(s, pad_char, padding)
             }
         }
@@ -63,11 +71,11 @@ hex_trait_impl!(u64, u64);
 hex_trait_impl!(u128, u128);
 
 #[cfg(target_pointer_width = "16")]
-hex_trait_impl!(usize, u16);
+hex_trait_impl!(usize, usize);
 #[cfg(target_pointer_width = "32")]
-hex_trait_impl!(usize, u32);
+hex_trait_impl!(usize, usize);
 #[cfg(target_pointer_width = "64")]
-hex_trait_impl!(usize, u64);
+hex_trait_impl!(usize, usize);
 
 hex_trait_impl!(i8, u8);
 hex_trait_impl!(i16, u16);
@@ -76,20 +84,22 @@ hex_trait_impl!(i64, u64);
 hex_trait_impl!(i128, u128);
 
 #[cfg(target_pointer_width = "16")]
-hex_trait_impl!(isize, u16);
+hex_trait_impl!(isize, usize);
 #[cfg(target_pointer_width = "32")]
-hex_trait_impl!(isize, u32);
+hex_trait_impl!(isize, usize);
 #[cfg(target_pointer_width = "64")]
-hex_trait_impl!(isize, u64);
+hex_trait_impl!(isize, usize);
 
 macro_rules! uxx {
     ($n:expr, $len:expr) => {{
-        let mut buf = [MaybeUninit::<u8>::uninit(); $len];
+        let mut buf = [0_u8; $len];
         let ptr = &buf.as_mut_ptr().cast::<u8>();
         let mut n = $n;
         let mut i = $len - 1;
         loop {
-            unsafe { ptr.add(i).write((n % 10) as u8 + b'0') }
+            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is 
+            // necessary because rust array accesses generate an undesired panicking branch.
+            unsafe { ptr.add(i).write_volatile((n % 10) as u8 + b'0') }
             n /= 10;
 
             if n == 0 {
@@ -98,6 +108,8 @@ macro_rules! uxx {
                 i -= 1;
             }
         }
+        // SAFETY: We only return characters here that we have previously initialised. This is 
+        // therefore safe and a new check for utf8 conformity is pointless.
         unsafe { str::from_utf8_unchecked(slice::from_raw_parts(ptr.add(i), $len - i)) }
     }};
 }
@@ -109,7 +121,7 @@ macro_rules! uxx_trait_impl {
             where
                 W: uWrite + ?Sized,
             {
-                fmt.write_str(uxx!(*self, $len))
+                fmt.write_str(uxx!(*self as $utype, $len))
             }
         }
 
@@ -123,7 +135,7 @@ macro_rules! uxx_trait_impl {
             where
                 W: uWrite + ?Sized,
             {
-                let s = uxx!(*self, $len);
+                let s = uxx!(*self as $utype, $len);
                 fmt.write_padded(s, pad_char, padding)
             }
         }
@@ -152,7 +164,7 @@ udisplay_as_udebug!(usize);
 
 macro_rules! ixx {
     ($uxx:ty, $n:expr, $len:expr) => {{
-        let mut buf = [MaybeUninit::<u8>::uninit(); $len];
+        let mut buf = [88_u8; $len];
         let ptr = &buf.as_mut_ptr().cast::<u8>();
         let n = $n;
         let negative = n.is_negative();
@@ -166,7 +178,9 @@ macro_rules! ixx {
         };
         let mut i = $len - 1;
         loop {
-            unsafe { ptr.add(i).write((n % 10) as u8 + b'0') }
+            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is 
+            // necessary because rust array accesses generate an undesired panicking branch.
+            unsafe { ptr.add(i).write_volatile((n % 10) as u8 + b'0') }
             n /= 10;
 
             if n == 0 {
@@ -178,9 +192,13 @@ macro_rules! ixx {
 
         if negative {
             i -= 1;
-            unsafe { ptr.add(i).write(b'-') }
+            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is 
+            // necessary because rust array accesses generate an undesired panicking branch.
+            unsafe { ptr.add(i).write_volatile(b'-') }
         }
 
+        // SAFETY: We only return characters here that we have previously initialised. This is 
+        // therefore safe and a new check for utf8 conformity is pointless.
         unsafe { str::from_utf8_unchecked(slice::from_raw_parts(ptr.add(i), $len - i)) }
     }};
 }
@@ -245,8 +263,8 @@ impl<const CAP: usize> Convert<CAP> {
     ///     assert_eq!("4711", conv.as_str());
     /// ```
     pub fn u32(u: u32) -> Result<Self, ()> {
-        // SAFETY: The data provided by this function is at the end definitly initialized
-        let mut fbuf = unsafe { Self::uninit() };
+        let buf = [b' '; CAP];
+        let mut fbuf = Convert { buf, idx: CAP };
         fbuf.format_u32(u)?;
         Ok(fbuf)
     }
@@ -291,8 +309,8 @@ impl<const CAP: usize> Convert<CAP> {
     ///     assert_eq!("-4711", conv.as_str());
     /// ```
     pub fn i32(i: i32) -> Result<Self, ()> {
-        // SAFETY: The data provided by this function is at the end definitly initialized
-        let mut fbuf = unsafe { Self::uninit() };
+        let buf = [b' '; CAP];
+        let mut fbuf = Convert { buf, idx: CAP };
         fbuf.format_i32(i)?;
         Ok(fbuf)
     }

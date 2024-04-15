@@ -81,8 +81,11 @@ impl<const CAP: usize> Convert<CAP> {
     ///     assert_eq!("3.1416", conv.as_str());
     /// ```
     pub fn f32(f: f32, decimal_places: usize) -> Result<Self, ()> {
-        // SAFETY: The data provided by this function is at the end definitly initialized
-        let mut fbuf = unsafe { Self::uninit() };
+        let buf = core::mem::MaybeUninit::<[u8; CAP]>::uninit();
+        // SAFETY: This routine returns only the part of string, which is initiliased, so this is save
+        //         Not initialising the buffer saves approx. 90 cycles
+        let buf = unsafe { buf.assume_init() };
+        let mut fbuf = Convert { buf, idx: CAP };
         fbuf.format_f32(f, decimal_places)?;
         Ok(fbuf)
     }
@@ -96,8 +99,11 @@ impl<const CAP: usize> Convert<CAP> {
     ///     assert_eq!("3.1416", conv.as_str());
     /// ```
     pub fn f64(f: f64, decimal_places: usize) -> Result<Self, ()> {
-        // SAFETY: The data provided by this function is at the end definitly initialized
-        let mut fbuf = unsafe { Self::uninit() };
+        let buf = core::mem::MaybeUninit::<[u8; CAP]>::uninit();
+        // SAFETY: This routine returns only the part of string, which is initiliased, so this is save
+        //         Not initialising the buffer saves approx. 90 cycles
+        let buf = unsafe { buf.assume_init() };
+        let mut fbuf = Convert { buf, idx: CAP };
         fbuf.format_f64(f, decimal_places)?;
         Ok(fbuf)
     }
