@@ -23,6 +23,14 @@ pub fn uwriteln(input: TokenStream) -> TokenStream {
     write(input, true)
 }
 
+/// Automatically derive the `uDebug` trait for a `struct` or `enum`
+///
+/// Supported items
+///
+/// - `struct`-s
+/// - `enum`-s
+///
+/// `union`-s are not supported
 #[proc_macro_derive(uDebug)]
 pub fn debug(input: TokenStream) -> TokenStream {
     debug_gen(input)

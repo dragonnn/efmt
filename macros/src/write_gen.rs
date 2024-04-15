@@ -201,7 +201,6 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
     .into()
 }
 
-
 fn get_alignment(alignment: Alignment, pad_length: usize) -> TokenStream2 {
     match alignment {
         Alignment::Left => quote!(tfmt::Padding::LeftAligned(#pad_length)),

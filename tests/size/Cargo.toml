@@ -1,5 +1,5 @@
 [package]
-name = "blinky"
+name = "size"
 categories = ["embedded", "no-std"]
 description = "size"
 keywords = ["arm", "cortex-m"]

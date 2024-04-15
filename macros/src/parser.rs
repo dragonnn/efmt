@@ -232,11 +232,8 @@ fn parse_colon(format: &str, span: Span) -> syn::parse::Result<(Piece, &str)> {
             }
         }
         '?' => {
-            if pad_length == 0 && behind == 0{
-                Ok((
-                    Piece::Debug(prefix),
-                    chars.as_str(),
-                ))
+            if pad_length == 0 && behind == 0 {
+                Ok((Piece::Debug(prefix), chars.as_str()))
             } else {
                 Err(err_piece())
             }

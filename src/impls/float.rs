@@ -1,4 +1,6 @@
-use crate::{uDebug, udisplay_as_udebug, uDisplay, uDisplayFloat, uWrite, Convert, Formatter, Padding};
+use crate::{
+    uDebug, uDisplay, uDisplayFloat, uWrite, udisplay_as_udebug, Convert, Formatter, Padding,
+};
 
 // max 2**32 4_294_967_296 (10 digits) + 6 digits right dp + '.' + '-' => 18 digits max
 const BUF_LEN: usize = 18;

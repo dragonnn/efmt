@@ -1,4 +1,4 @@
-use crate::{uDebug, udisplay_as_udebug, uDisplay, uDisplayPadded, uWrite, Formatter, Padding};
+use crate::{uDebug, uDisplay, uDisplayPadded, uWrite, udisplay_as_udebug, Formatter, Padding};
 
 impl uDisplay for bool {
     fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>

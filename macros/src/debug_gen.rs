@@ -3,11 +3,7 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use proc_macro2::{Literal, Span};
 use quote::quote;
-use syn::{
-    parse,
-    parse_macro_input, parse_quote,
-    Data, DeriveInput, Fields, GenericParam, Ident,
-};
+use syn::{parse, parse_macro_input, parse_quote, Data, DeriveInput, Fields, GenericParam, Ident};
 
 pub fn debug_gen(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);

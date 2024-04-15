@@ -1,10 +1,12 @@
 #![doc = include_str!("../README.md")]
 #![cfg_attr(not(feature = "std"), no_std)]
 
+mod helpers;
 mod impls;
 mod utils;
-mod helpers;
 use core::{slice::from_raw_parts, str::from_utf8_unchecked};
+
+/// Derive macro
 pub mod derive {
     pub use tfmt_macros::uDebug;
 }
@@ -18,13 +20,13 @@ pub trait uWrite {
     /// The error associated to this writer
     type Error;
 
-    /// Writes a string slice into this writer, returning whether the write succeeded.
+    /// Writes a string slice into this writer, returning whether the write succeeded
     ///
     /// This method can only succeed if the entire string slice was successfully written, and this
     /// method will not return until all data has been written or an error occurs.
     fn write_str(&mut self, s: &str) -> Result<(), Self::Error>;
 
-    /// Writes a [`char`] into this writer, returning whether the write succeeded.
+    /// Writes a [`char`] into this writer, returning whether the write succeeded
     ///
     /// A single [`char`] may be encoded as more than one byte. This method can only succeed if the
     /// entire byte sequence was successfully written, and this method will not return until all
@@ -86,7 +88,7 @@ macro_rules! uformat {
     }};
 }
 
-/// Documentation
+#[doc(hidden)]
 #[macro_export]
 macro_rules! udisplay_as_udebug {
     ($type: ty) => {
@@ -99,24 +101,23 @@ macro_rules! udisplay_as_udebug {
                 <$type as uDisplay>::fmt(self, f)
             }
         }
-    }
+    };
 }
 
-
 /// Write formatted data into a buffer
-/// 
+///
 /// This macro accepts a format string, a list of arguments, and a 'writer'. Arguments will be
 /// formatted according to the specified format string and the result will be passed to the writer.
 /// The writer must have type `[&mut] impl uWrite` or `[&mut] ufmt::Formatter<'_, impl uWrite>`. The
 /// macro returns the associated `Error` type of the `uWrite`-r.
 ///
 /// This is a procedural macro, which means that it is executed at compile time and the content is
-/// interpreted then. The result is efficient executable code in the target system that does not 
+/// interpreted then. The result is efficient executable code in the target system that does not
 /// perform any interpretation or dynamic dispatch.
 ///
 /// ```
 /// use tfmt::uwrite;
-/// 
+///
 /// let mut s = String::new();
 /// uwrite!(&mut s, "the {} is {}", "number", 42).unwrap();
 /// assert!(s.as_str() == "the number is 42");
@@ -144,13 +145,13 @@ macro_rules! udisplay_as_udebug {
 /// | {:08x}  | internal hex            | pad_char: '0', padding: Usual(8)             |
 /// | {:#x}   | internal hex            | prefix: true                                 |
 /// | {{, }}  | -                       | escape braces                                |
-/// 
+///
 /// For more details see:
 /// - integer formatting: `tests/int.rs`
 /// - float formatting: `tests/float.rs`
 /// - string and char formatting: `tests/core.rs`
 /// - [uDisplayFormatted] example: `examples/coords`
-/// 
+///
 #[cfg(not(doctest))] // only ok with features "std"
 pub use tfmt_macros::uwrite;
 
@@ -176,30 +177,37 @@ where
 {
     /// Creates a formatter from the given writer
     pub fn new(writer: &'w mut W) -> Self {
-        Self { writer, indentation: 0, pretty: false }
+        Self {
+            writer,
+            indentation: 0,
+            pretty: false,
+        }
     }
 
-    /// Writes a character to the underlying buffer contained within this formatter.
+    /// Writes a character to the underlying buffer
     pub fn write_char(&mut self, c: char) -> Result<(), W::Error> {
         let mut buf = [0_u8; 4];
         let s = c.encode_utf8(&mut buf);
         self.writer.write_str(s)
     }
 
-    /// Writes a string slice to the underlying buffer contained within this formatter.
+    /// Writes a string slice to the underlying buffer
     pub fn write_str(&mut self, s: &str) -> Result<(), W::Error> {
         self.writer.write_str(s)
     }
 
     /// Execute the closure with pretty-printing enabled
-    pub fn pretty(&mut self, f: impl FnOnce(&mut Self) -> Result<(), W::Error>) -> Result<(), W::Error> {
+    pub fn pretty(
+        &mut self,
+        f: impl FnOnce(&mut Self) -> Result<(), W::Error>,
+    ) -> Result<(), W::Error> {
         let pretty = self.pretty;
         self.pretty = true;
         f(self)?;
         self.pretty = pretty;
         Ok(())
     }
-    
+
     /// Write whitespace according to the current `self.indentation`
     fn indent(&mut self) -> Result<(), W::Error> {
         for _ in 0..self.indentation {
@@ -334,7 +342,7 @@ pub struct Convert<const CAP: usize> {
 impl<const CAP: usize> Convert<CAP> {
     /// Returns a reference to the string contained in Convert
     pub fn as_str(&self) -> &str {
-        // SAFETY: We only return characters here that we have previously initialised. This is 
+        // SAFETY: We only return characters here that we have previously initialised. This is
         // therefore safe and a new check for utf8 conformity is pointless.
         unsafe {
             let p_buf = self.buf.as_ptr().cast::<u8>();
@@ -349,7 +357,7 @@ impl<const CAP: usize> Convert<CAP> {
         if self.idx > 0 {
             let p_buf = self.buf.as_mut_ptr().cast::<u8>();
             self.idx -= 1;
-            // SAFETY: Since idx >= 0 and below CAP, this access is secure. This construct is 
+            // SAFETY: Since idx >= 0 and below CAP, this access is secure. This construct is
             // necessary because rust array accesses generate an undesired panicking branch.
             unsafe { p_buf.add(self.idx).write_volatile(c) };
             Ok(())
@@ -366,4 +374,3 @@ impl<const CAP: usize> Convert<CAP> {
         Ok(())
     }
 }
-

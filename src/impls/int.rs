@@ -1,6 +1,6 @@
 use crate::{
-    uDisplay, uDebug, udisplay_as_udebug, uDisplayHex, uDisplayPadded, uWrite, Convert, 
-    Formatter, Padding
+    uDebug, uDisplay, uDisplayHex, uDisplayPadded, uWrite, udisplay_as_udebug, Convert, Formatter,
+    Padding,
 };
 use core::{slice, str};
 
@@ -15,7 +15,7 @@ macro_rules! hex {
         loop {
             let val = (n % 16) as u8;
             let d = if val < 10 { b'0' + val } else { c + val - 10 };
-            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is 
+            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is
             // necessary because rust array accesses generate an undesired panicking branch.
             unsafe { ptr.add(i).write_volatile(d) }
 
@@ -28,16 +28,16 @@ macro_rules! hex {
         }
         if $prefix {
             i -= 1;
-            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is 
+            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is
             // necessary because rust array accesses generate an undesired panicking branch.
             unsafe { ptr.add(i).write_volatile(b'x') }
             i -= 1;
-            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is 
+            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is
             // necessary because rust array accesses generate an undesired panicking branch.
             unsafe { ptr.add(i).write_volatile(b'0') }
         }
 
-        // SAFETY: We only return characters here that we have previously initialised. This is 
+        // SAFETY: We only return characters here that we have previously initialised. This is
         // therefore safe and a new check for utf8 conformity is pointless.
         unsafe { str::from_utf8_unchecked(slice::from_raw_parts(ptr.add(i), len - i)) }
     }};
@@ -97,7 +97,7 @@ macro_rules! uxx {
         let mut n = $n;
         let mut i = $len - 1;
         loop {
-            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is 
+            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is
             // necessary because rust array accesses generate an undesired panicking branch.
             unsafe { ptr.add(i).write_volatile((n % 10) as u8 + b'0') }
             n /= 10;
@@ -108,7 +108,7 @@ macro_rules! uxx {
                 i -= 1;
             }
         }
-        // SAFETY: We only return characters here that we have previously initialised. This is 
+        // SAFETY: We only return characters here that we have previously initialised. This is
         // therefore safe and a new check for utf8 conformity is pointless.
         unsafe { str::from_utf8_unchecked(slice::from_raw_parts(ptr.add(i), $len - i)) }
     }};
@@ -178,7 +178,7 @@ macro_rules! ixx {
         };
         let mut i = $len - 1;
         loop {
-            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is 
+            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is
             // necessary because rust array accesses generate an undesired panicking branch.
             unsafe { ptr.add(i).write_volatile((n % 10) as u8 + b'0') }
             n /= 10;
@@ -192,12 +192,12 @@ macro_rules! ixx {
 
         if negative {
             i -= 1;
-            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is 
+            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is
             // necessary because rust array accesses generate an undesired panicking branch.
             unsafe { ptr.add(i).write_volatile(b'-') }
         }
 
-        // SAFETY: We only return characters here that we have previously initialised. This is 
+        // SAFETY: We only return characters here that we have previously initialised. This is
         // therefore safe and a new check for utf8 conformity is pointless.
         unsafe { str::from_utf8_unchecked(slice::from_raw_parts(ptr.add(i), $len - i)) }
     }};
@@ -250,7 +250,6 @@ udisplay_as_udebug!(i32);
 udisplay_as_udebug!(i64);
 udisplay_as_udebug!(i128);
 udisplay_as_udebug!(isize);
-
 
 // Extend the Convert struct
 impl<const CAP: usize> Convert<CAP> {
