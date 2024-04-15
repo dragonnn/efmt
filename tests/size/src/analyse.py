@@ -50,29 +50,24 @@ width = 0.34  # the width of the bars
 multiplier = 0
 colors={'tfmt': 'tab:green', 'fmt': 'tab:orange'}
 
-fig, ax = plt.subplots(layout='constrained')
+fig, ax = plt.subplots(1, 2, figsize=(12.8, 4.2), dpi=100)
 
 for attribute, min_cs in sizes.items():
     offset = width * multiplier
     color = colors[attribute]
-    rects = ax.bar(x + offset, min_cs, width, label=attribute, color=color)
-    ax.bar_label(rects, padding=3)
+    rects = ax[0].bar(x + offset, min_cs, width, label=attribute, color=color)
+    ax[0].bar_label(rects, padding=3)
     multiplier += 1
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
-ax.set_title("Flash Size for 'tfmt' and 'core::fmt'")
-ax.title.set_size(15)
-ax.set_ylabel('Size (bytes)')
-ax.set_xticks(x + width - 0.17, names)
-ax.legend(loc='upper left', ncols=len(names))
-ax.set_ylim(0, 25_000)
-
-# plt.show()
-plt.savefig("sizes.png")
+ax[0].set_title("Flash Size for 'tfmt' and 'core::fmt'")
+ax[0].title.set_size(15)
+ax[0].set_ylabel('Size (bytes)')
+ax[0].set_xticks(x + width - 0.17, names)
+ax[0].legend(loc='upper left', ncols=len(names))
+ax[0].set_ylim(0, 25_000)
 
 multiplier = 0
-
-fig, ax = plt.subplots(layout='constrained')
 
 for attribute, min_cs in min_cycles.items():
     max_cs = max_cycles[attribute]
@@ -80,20 +75,20 @@ for attribute, min_cs in min_cycles.items():
     color = colors[attribute]
 
     label = attribute + '-min'
-    rects = ax.bar(x + offset, min_cs, width, label=label, color=color)
+    rects = ax[1].bar(x + offset, min_cs, width, label=label, color=color)
 
     label = attribute + '-max'
-    rects = ax.bar(x + offset, max_cs, width, bottom=min_cs, label=label, color=color, alpha=0.5)
-    ax.bar_label(rects, padding=3)
+    rects = ax[1].bar(x + offset, max_cs, width, bottom=min_cs, label=label, color=color, alpha=0.5)
+    ax[1].bar_label(rects, padding=3)
     multiplier += 1
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
-ax.set_title("Cortex M4 Cycles for 'tfmt' and 'core::fmt'")
-ax.title.set_size(15)
-ax.set_ylabel('Cycles')
-ax.set_xticks(x + width -0.17, names)
-ax.legend(loc='upper left', ncols=2)
-ax.set_ylim(0, 6_000)
+ax[1].set_title("Cortex M4 Cycles for 'tfmt' and 'core::fmt'")
+ax[1].title.set_size(15)
+ax[1].set_ylabel('Cycles')
+ax[1].set_xticks(x + width -0.17, names)
+ax[1].legend(loc='upper left', ncols=2)
+ax[1].set_ylim(0, 6_000)
 
 # plt.show()
-plt.savefig("cycles.png")
+plt.savefig("performance.png")
