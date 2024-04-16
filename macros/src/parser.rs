@@ -158,11 +158,16 @@ fn parse_colon(format: &str, span: Span) -> syn::parse::Result<(Piece, &str)> {
     let mut chars = format.chars();
     let ch = chars.next().ok_or(err_piece())?;
 
-    let (ch, pad_char) = if ch == '0' {
-        let ch = chars.next().ok_or(err_piece())?;
-        (ch, b'0')
-    } else {
-        (ch, b' ')
+    let (ch, pad_char) = match ch { // {:0^17.6}
+        '1'..='9'|'<'|'>'|'^'|'#'|'.'|'?'|'A'..='Z'|'a'..='z' => (ch, b' '),
+        _ => {
+            let pad_char = if (ch as u32) < 0x80 {
+                ch as u8
+            } else {
+                return Err(err_piece())
+            };
+            (chars.next().ok_or(err_piece())?, pad_char)   
+        }
     };
 
     let (ch, alignment) = match ch {
@@ -172,11 +177,18 @@ fn parse_colon(format: &str, span: Span) -> syn::parse::Result<(Piece, &str)> {
         _ => (ch, Alignment::Usual),
     };
 
-    let (mut ch, prefix) = if ch == '#' {
+    let (ch, prefix) = if ch == '#' {
         let ch = chars.next().ok_or(err_piece())?;
         (ch, true)
     } else {
         (ch, false)
+    };
+
+    let (mut ch, pad_char) = if ch == '0' {
+        let ch = chars.next().ok_or(err_piece())?;
+        (ch, b'0')
+    } else {
+        (ch, pad_char)
     };
 
     let mut pad_length = 0_usize;
@@ -199,6 +211,7 @@ fn parse_colon(format: &str, span: Span) -> syn::parse::Result<(Piece, &str)> {
     if ch != '}' {
         return Err(err_piece());
     }
+
     match cmd {
         '.' => {
             if behind < 7 && prefix == false {
@@ -215,7 +228,7 @@ fn parse_colon(format: &str, span: Span) -> syn::parse::Result<(Piece, &str)> {
                 Err(err_piece())
             }
         }
-        'x' | 'X' => {
+        'x' | 'X' | 'b' | 'o' => {
             if behind == 0 {
                 Ok((
                     Piece::Hex {

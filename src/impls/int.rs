@@ -4,33 +4,46 @@ use crate::{
 };
 use core::{slice, str};
 
+const HEX_BUF_LEN: usize = 35;
+
 macro_rules! hex {
-    ($utype: ty, $n:expr, $upper: expr, $prefix: expr) => {{
-        let mut buf = [0_u8; core::mem::size_of::<$utype>() * 2 + 2];
+    ($utype: ty, $n:expr, $upper: expr, $prefix: expr, $div: expr, $len: expr) => {{
+        let mut buf = [0_u8; HEX_BUF_LEN];
         let ptr = &buf.as_mut_ptr().cast::<u8>();
-        let len = core::mem::size_of::<$utype>() * 2 + 2;
         let mut n = $n;
         let c = if $upper { b'A' } else { b'a' };
-        let mut i = len - 1;
+        let mut i = HEX_BUF_LEN - 1;
+        let mut len = $len;
         loop {
-            let val = (n % 16) as u8;
+            let val = (n % $div) as u8;
             let d = if val < 10 { b'0' + val } else { c + val - 10 };
             // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is
             // necessary because rust array accesses generate an undesired panicking branch.
-            unsafe { ptr.add(i).write_volatile(d) }
 
-            n /= 16;
-            if n == 0 {
+            if i == 2 {
+                buf[HEX_BUF_LEN - 5..HEX_BUF_LEN].copy_from_slice(b" ovfl");
+                i = HEX_BUF_LEN - 5;
+                break;
+            } else {
+                unsafe { ptr.add(i).write_volatile(d) }
+            }
+
+            n /= $div;
+            if n == 0 && len == 0 {
                 break;
             } else {
                 i -= 1;
+                if len > 0 {
+                    len -= 1;
+                }
             }
+
         }
-        if $prefix {
+        if let Some(c) = $prefix {
             i -= 1;
             // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is
             // necessary because rust array accesses generate an undesired panicking branch.
-            unsafe { ptr.add(i).write_volatile(b'x') }
+            unsafe { ptr.add(i).write_volatile(c) }
             i -= 1;
             // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is
             // necessary because rust array accesses generate an undesired panicking branch.
@@ -39,7 +52,7 @@ macro_rules! hex {
 
         // SAFETY: We only return characters here that we have previously initialised. This is
         // therefore safe and a new check for utf8 conformity is pointless.
-        unsafe { str::from_utf8_unchecked(slice::from_raw_parts(ptr.add(i), len - i)) }
+        unsafe { str::from_utf8_unchecked(slice::from_raw_parts(ptr.add(i), HEX_BUF_LEN - i)) }
     }};
 }
 
@@ -57,8 +70,37 @@ macro_rules! hex_trait_impl {
             where
                 W: uWrite + ?Sized,
             {
-                let s = hex!($u_type, *self as $u_type, cmd == 'X', prefix);
-                fmt.write_padded(s, pad_char, padding)
+                let (c, div) = match cmd {
+                    'o' => (b'o', 8),
+                    'b' => (b'b', 2),
+                    _ => (b'x', 16), // 'x', 'X'
+                };
+                let pre_char = if prefix {
+                    Some(c)
+                } else {
+                    None
+                };
+                let len = if pad_char == '0' {
+                    let len = match padding {
+                        Padding::LeftAligned(l) => l,
+                        Padding::RightAligned(l) => l,
+                        Padding::CenterAligned(l) => l,
+                        Padding::Usual(l) => l,
+                    };
+                    if prefix {
+                        len - 3
+                    } else {
+                        len - 1
+                    }
+                } else {
+                    0
+                };
+                let s = hex!($u_type, *self as $u_type, cmd == 'X', pre_char, div, len);
+                if len == 0 {
+                    fmt.write_padded(s, pad_char, padding)
+                } else {
+                    fmt.write_str(s)
+                }
             }
         }
     };
@@ -357,7 +399,7 @@ impl<T> uDebug for *const T {
     where
         W: uWrite + ?Sized,
     {
-        let s = hex!(u16, *self as u16, false, true);
+        let s = hex!(u16, *self as u16, false, Some(b'x'), 16, 0);
         f.write_str(s)
     }
 
@@ -366,7 +408,7 @@ impl<T> uDebug for *const T {
     where
         W: uWrite + ?Sized,
     {
-        let s = hex!(u32, *self as u32, false, true);
+        let s = hex!(u32, *self as u32, false, Some(b'x'), 16, 0);
         f.write_str(s)
     }
 
@@ -375,7 +417,7 @@ impl<T> uDebug for *const T {
     where
         W: uWrite + ?Sized,
     {
-        let s = hex!(u64, *self as u64, false, true);
+        let s = hex!(u64, *self as u64, false, Some(b'x'), 16, 0);
         f.write_str(s)
     }
 }
