@@ -294,7 +294,39 @@ pub enum Padding {
 
 /// Creating padded output string
 ///
-/// See [uwrite] for details
+/// See [uwrite] for details.
+/// 
+/// ```
+/// use tfmt::{uformat, uDisplayPadded, Convert};
+/// 
+/// struct Time {
+///     hour: u8,
+///     min: u8,
+///     sec: u8,
+/// }
+/// 
+/// impl uDisplayPadded for Time {
+///     fn fmt_padded<W>(
+///             &self,
+///             fmt: &mut tfmt::Formatter<'_, W>,
+///             padding: tfmt::Padding,
+///             pad_char: char,
+///         ) -> Result<(), W::Error>
+///         where
+///             W: tfmt::uWrite + ?Sized 
+///     {
+///         let mut conv = Convert::<6>::new(b'0');
+///         conv.u32_pad(self.sec as u32, 2).unwrap();
+///         conv.u32_pad(self.min as u32, 2).unwrap();
+///         conv.u32_pad(self.hour as u32, 2).unwrap();
+///         fmt.write_padded(conv.as_str(), pad_char, padding)
+///     }
+/// }
+/// 
+/// let time = Time { hour: 3, min: 17, sec: 7 };
+/// let s = uformat!(100, "{:^10}", time).unwrap();
+/// assert_eq!("  031707  ", s.as_str());
+/// ```
 #[allow(non_camel_case_types)]
 pub trait uDisplayPadded {
     /// Formats the value using the given formatter
@@ -311,6 +343,76 @@ pub trait uDisplayPadded {
 /// Creating formatted output string
 ///
 /// See [uwrite] for details
+/// 
+/// ```
+/// use std::f64::consts::PI;
+/// use tfmt::{uDisplayFormatted, uformat, Convert};
+///
+/// struct Coord(f64);
+///
+/// impl uDisplayFormatted for Coord {
+///     fn fmt_formatted<W>(
+///         &self,
+///         fmt: &mut tfmt::Formatter<'_, W>,
+///         _prefix: bool,
+///         cmd: char,
+///         padding: tfmt::Padding,
+///         pad_char: char,
+///         decimal_places: usize,
+///     ) -> Result<(), W::Error>
+///     where
+///         W: tfmt::uWrite + ?Sized,
+///     {
+///         let (sign, rad) = match cmd {
+///             'E' => {
+///                 if (*self).0.is_sign_positive() {
+///                     (b'E', (*self).0)
+///                 } else {
+///                     (b'W', -(*self).0)
+///                 }
+///             }
+///             _ => {
+///                 if (*self).0.is_sign_positive() {
+///                     (b'N', (*self).0)
+///                 } else {
+///                     (b'S', -(*self).0)
+///                 }
+///             }
+///         };
+
+///         let degs = rad * 180.0 / PI;
+///         let mins = degs.fract() * 60.0;
+
+///         let l_min = if decimal_places > 0 {
+///             decimal_places + 3
+///         } else {
+///             decimal_places + 2
+///         };
+
+///         let mut conv = Convert::<15>::new(b'0');
+///         conv.write_u8(sign).unwrap();
+///         conv.write_u8(b',').unwrap();
+///         conv.f64_pad(mins, l_min, decimal_places).unwrap();
+///         conv.u32(degs as u32).unwrap();
+///         fmt.write_padded(conv.as_str(), pad_char, padding)
+///     }
+/// }
+
+/// let lat_berlin = Coord(0.9180516165333352);
+/// let lon_berlin = Coord(0.23304198843966833);
+
+/// /// format for coord is dddmm
+/// let s = uformat!(100, "{:N0},{:E0}", lat_berlin, lon_berlin).unwrap();
+/// assert_eq!("5236,N,1321,E", s.as_str());
+
+/// /// format for coord is dddmm.mmm
+/// let s = uformat!(100, "{:N3},{:E3}", lat_berlin, lon_berlin).unwrap();
+/// assert_eq!("5236.029,N,1321.139,E", s.as_str());
+
+/// /// format for coord is dddmm.mmmmmm
+/// let s = uformat!(100, "{:013N6},{:014E6}", lat_berlin, lon_berlin).unwrap();
+/// assert_eq!("5236.028980,N,01321.139343,E", s.as_str());
+/// ```
 #[allow(non_camel_case_types)]
 pub trait uDisplayFormatted {
     /// Formats the value using the given formatter
@@ -340,6 +442,11 @@ pub struct Convert<const CAP: usize> {
 }
 
 impl<const CAP: usize> Convert<CAP> {
+    /// Creates a new Convert instance with buffer set to pad_char
+    pub fn new(pad_char: u8) -> Convert<CAP> {
+        Convert { buf: [pad_char; CAP], idx: CAP }
+    }
+
     /// Returns a reference to the string contained in Convert
     pub fn as_str(&self) -> &str {
         // SAFETY: We only return characters here that we have previously initialised. This is
@@ -353,7 +460,7 @@ impl<const CAP: usize> Convert<CAP> {
     }
 
     /// Writes a u8 to the buffer and post decrements the idx
-    fn write_char(&mut self, c: u8) -> Result<(), ()> {
+    pub fn write_u8(&mut self, c: u8) -> Result<(), ()> {
         if self.idx > 0 {
             let p_buf = self.buf.as_mut_ptr().cast::<u8>();
             self.idx -= 1;
@@ -367,9 +474,9 @@ impl<const CAP: usize> Convert<CAP> {
     }
 
     /// Writes a string to the buffer
-    fn write_str(&mut self, s: &str) -> Result<(), ()> {
+    pub fn write_str(&mut self, s: &str) -> Result<(), ()> {
         for c in s.bytes().rev() {
-            self.write_char(c)?;
+            self.write_u8(c)?;
         }
         Ok(())
     }

@@ -16,7 +16,7 @@ impl uDisplayFloat for f32 {
     where
         W: uWrite + ?Sized,
     {
-        let convert = Convert::<BUF_LEN>::f32(*self, behind);
+        let convert = Convert::<BUF_LEN>::from_f32(*self, behind);
         if let Ok(convert) = convert {
             fmt.write_padded(convert.as_str(), pad_char, padding)?;
         }
@@ -29,7 +29,7 @@ impl uDisplay for f32 {
     where
         W: uWrite + ?Sized,
     {
-        let convert = Convert::<BUF_LEN>::f32(*self, 3);
+        let convert = Convert::<BUF_LEN>::from_f32(*self, 3);
         if let Ok(convert) = convert {
             fmt.write_str(convert.as_str())?;
         }
@@ -50,7 +50,7 @@ impl uDisplayFloat for f64 {
     where
         W: uWrite + ?Sized,
     {
-        let convert = Convert::<BUF_LEN>::f64(*self, behind);
+        let convert = Convert::<BUF_LEN>::from_f64(*self, behind);
         if let Ok(convert) = convert {
             fmt.write_padded(convert.as_str(), pad_char, padding)?;
         }
@@ -63,7 +63,7 @@ impl uDisplay for f64 {
     where
         W: uWrite + ?Sized,
     {
-        let convert = Convert::<BUF_LEN>::f64(*self, 3);
+        let convert = Convert::<BUF_LEN>::from_f64(*self, 3);
         if let Ok(convert) = convert {
             fmt.write_str(convert.as_str())?;
         }
@@ -79,16 +79,16 @@ impl<const CAP: usize> Convert<CAP> {
     /// ```
     ///     use tfmt::Convert;
     ///
-    ///     let conv = Convert::<20>::f32(3.14159265359, 4).unwrap();
+    ///     let conv = Convert::<20>::from_f32(3.14159265359, 4).unwrap();
     ///     assert_eq!("3.1416", conv.as_str());
     /// ```
-    pub fn f32(f: f32, decimal_places: usize) -> Result<Self, ()> {
+    pub fn from_f32(f: f32, decimal_places: usize) -> Result<Self, ()> {
         let buf = core::mem::MaybeUninit::<[u8; CAP]>::uninit();
         // SAFETY: This routine returns only the part of string, which is initiliased, so this is save
         //         Not initialising the buffer saves approx. 90 cycles
         let buf = unsafe { buf.assume_init() };
         let mut fbuf = Convert { buf, idx: CAP };
-        fbuf.format_f32(f, decimal_places)?;
+        fbuf.f32(f, decimal_places)?;
         Ok(fbuf)
     }
 
@@ -97,16 +97,16 @@ impl<const CAP: usize> Convert<CAP> {
     /// ```
     ///     use tfmt::Convert;
     ///
-    ///     let conv = Convert::<20>::f64(3.14159265359, 4).unwrap();
+    ///     let conv = Convert::<20>::from_f64(3.14159265359, 4).unwrap();
     ///     assert_eq!("3.1416", conv.as_str());
     /// ```
-    pub fn f64(f: f64, decimal_places: usize) -> Result<Self, ()> {
+    pub fn from_f64(f: f64, decimal_places: usize) -> Result<Self, ()> {
         let buf = core::mem::MaybeUninit::<[u8; CAP]>::uninit();
         // SAFETY: This routine returns only the part of string, which is initiliased, so this is save
         //         Not initialising the buffer saves approx. 90 cycles
         let buf = unsafe { buf.assume_init() };
         let mut fbuf = Convert { buf, idx: CAP };
-        fbuf.format_f64(f, decimal_places)?;
+        fbuf.f64(f, decimal_places)?;
         Ok(fbuf)
     }
 
@@ -118,18 +118,18 @@ impl<const CAP: usize> Convert<CAP> {
     /// ```
     ///     use tfmt::Convert;
     ///
-    ///     let conv = Convert::<20>::f32_pad(3.14159265359, 7, 3, '0').unwrap();
+    ///     let mut conv = Convert::<20>::new(b'0'); 
+    ///     conv.f32_pad(3.14159265359, 7, 3).unwrap();
     ///     assert_eq!("003.142", conv.as_str());
     /// ```
-    pub fn f32_pad(f: f32, len: usize, decimal_places: usize, pad_char: char) -> Result<Self, ()> {
-        if pad_char as u32 >= 0x80 || len > CAP {
+    pub fn f32_pad(&mut self, f: f32, len: usize, decimal_places: usize) -> Result<(), ()> {
+        if len > CAP {
             return Err(());
         }
-        let buf = [pad_char as u8; CAP];
-        let mut fbuf = Convert { buf, idx: CAP };
-        fbuf.format_f32(f, decimal_places)?;
-        fbuf.idx = CAP - len;
-        Ok(fbuf)
+        let next_idx = self.idx - len;
+        self.f32(f, decimal_places)?;
+        self.idx = next_idx;
+        Ok(())
     }
 
     /// Converts a f64 number into a string of length len with the specified precision
@@ -140,21 +140,22 @@ impl<const CAP: usize> Convert<CAP> {
     /// ```
     ///     use tfmt::Convert;
     ///
-    ///     let conv = Convert::<20>::f64_pad(3.14159265359, 7, 3, '0').unwrap();
+    ///     let mut conv = Convert::<20>::new(b'0'); 
+    ///     conv.f64_pad(3.14159265359, 7, 3).unwrap();
     ///     assert_eq!("003.142", conv.as_str());
     /// ```
-    pub fn f64_pad(f: f64, len: usize, decimal_places: usize, pad_char: char) -> Result<Self, ()> {
-        if pad_char as u32 >= 0x80 || len > CAP {
+    pub fn f64_pad(&mut self, f: f64, len: usize, decimal_places: usize) -> Result<(), ()> {
+        if len > CAP {
             return Err(());
         }
-        let buf = [pad_char as u8; CAP];
-        let mut fbuf = Convert { buf, idx: CAP };
-        fbuf.format_f64(f, decimal_places)?;
-        fbuf.idx = CAP - len;
-        Ok(fbuf)
+        let next_idx = self.idx - len;
+        self.f64(f, decimal_places)?;
+        self.idx = next_idx;
+        Ok(())
     }
 
-    fn format_f32(&mut self, f: f32, decimal_places: usize) -> Result<(), ()> {
+    /// Appends a f32 number with the specified precision
+    pub fn f32(&mut self, f: f32, decimal_places: usize) -> Result<(), ()> {
         // General checks for validity and overflow
         if f.is_nan() {
             self.write_str("NaN")?;
@@ -192,7 +193,8 @@ impl<const CAP: usize> Convert<CAP> {
         self.float_as_str(left, right, decimal_places, is_neg)
     }
 
-    fn format_f64(&mut self, f: f64, decimal_places: usize) -> Result<(), ()> {
+    /// Appends a f64 number with the specified precision
+    pub fn f64(&mut self, f: f64, decimal_places: usize) -> Result<(), ()> {
         // General checks for validity and overflow
         if f.is_nan() {
             self.write_str("NaN")?;
@@ -244,7 +246,10 @@ impl<const CAP: usize> Convert<CAP> {
         let dp_idx = if decimal_places == 0 {
             None
         } else {
-            Some(CAP - decimal_places as usize)
+            if decimal_places > self.idx {
+                return Err(())
+            }
+            Some(self.idx - decimal_places as usize)
         };
 
         // Safety: This is necessary to avoid getting a panic branch
@@ -255,25 +260,25 @@ impl<const CAP: usize> Convert<CAP> {
             while self.idx > dp_idx {
                 let m = (right % 10) as u8;
                 right = right / 10;
-                self.write_char(m + b'0')?;
+                self.write_u8(m + b'0')?;
             }
-            self.write_char(b'.')?;
+            self.write_u8(b'.')?;
         }
 
         // write digits to the left of the dp
         if left == 0 {
-            self.write_char(b'0')?;
+            self.write_u8(b'0')?;
         } else {
             while left > 0 {
                 let m = (left % 10) as u8;
                 left = left / 10;
-                self.write_char(m + b'0')?;
+                self.write_u8(m + b'0')?;
             }
         }
 
         // Add negativ sign if necessary
         if is_neg {
-            self.write_char(b'-')?;
+            self.write_u8(b'-')?;
         }
         Ok(())
     }

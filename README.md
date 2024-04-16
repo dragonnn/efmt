@@ -150,11 +150,19 @@ assert_eq!(
 );
 ```
 
-## Performance
+## Technical Notes
 
-The following table shows a comparison of `tfmt` with `core::fmt` using a few examples. tfmt is 
-significantly smaller and also much faster than `core::fmt`. Another difference is that
-`tfmt` does not contain a panicking branch. This can be an important difference for embedded systems.
+### Performance
+
+The use of micro-benchmarks is usually problematic. Nevertheless, the trends can be recognised 
+very well. The following table shows a comparison of `tfmt` with `core::fmt` using a few examples. 
+tfmt is significantly smaller and also much faster than `core::fmt`. Another difference is that
+`tfmt` does not contain a panicking branch. This can be an important difference for embedded 
+systems. The high memory requirement of `core::fmt` in connection with floats is astonishing. The 
+strong fluctuations in the required cycles are also surprising.
+
+The sources for generating the data and the visualisation can be found in the `tests/size` 
+directory.
 
 | Name                 | Crate |         Size |   Cycles_min |   Cycles_max |
 |----------------------|-------|--------------|--------------|--------------|
@@ -169,10 +177,23 @@ significantly smaller and also much faster than `core::fmt`. Another difference 
 | f32                  |  tfmt |          720 |          189 |          196 |
 | f32                  |   fmt |        23420 |         1049 |         4799 |
 
-The contents of the table are shown graphically below. The sources for generating the data and 
-the visualisation can be found in `tests/size` directory.
+The contents of the table are shown graphically below:
 
 ![Size comparisation](https://github.com/Simsys/tfmt/blob/main/tests/size/performance.png?raw=true)
+
+### Use of unsafe
+
+Unsafe is used in several places in the code. Careful consideration has been given to whether this 
+is necessary and safe. Unsafe is useful in the following situations:
+- Some cycles can be saved if buffers that are guaranteed to be written later are not initialised 
+  initially. In simple situations, the compiler sees this and omits the initialisation itself. In 
+  more complex structures, however, it is not able to do this (src/float.rs).
+- To avoid panicking branches, arrays are usually accessed with pointers. Either the context 
+  ensures that this works or it is checked.
+- Bytes buffer is converted to str without checking for UTF8 compatibility. This is safe because 
+  the buffer was previously written with defined UTF8-compliant characters.
+
+All positions have been commented accordingly.  
 
 ## License
 

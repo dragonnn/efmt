@@ -300,13 +300,13 @@ impl<const CAP: usize> Convert<CAP> {
     /// ```
     ///     use tfmt::Convert;
     ///
-    ///     let conv = Convert::<20>::u32(4711).unwrap();
+    ///     let conv = Convert::<20>::from_u32(4711).unwrap();
     ///     assert_eq!("4711", conv.as_str());
     /// ```
-    pub fn u32(u: u32) -> Result<Self, ()> {
+    pub fn from_u32(u: u32) -> Result<Self, ()> {
         let buf = [b' '; CAP];
         let mut fbuf = Convert { buf, idx: CAP };
-        fbuf.format_u32(u)?;
+        fbuf.u32(u)?;
         Ok(fbuf)
     }
 
@@ -315,23 +315,24 @@ impl<const CAP: usize> Convert<CAP> {
     /// ```
     ///     use tfmt::Convert;
     ///
-    ///     let conv = Convert::<20>::u32_pad(4711, 6, '0').unwrap();
+    ///     let mut conv = Convert::<20>::new(b'0');
+    ///     conv.u32_pad(4711, 6).unwrap();
     ///     assert_eq!("004711", conv.as_str());
     /// ```
-    pub fn u32_pad(u: u32, len: usize, pad_char: char) -> Result<Self, ()> {
-        if pad_char as u32 >= 0x80 || len > CAP {
+    pub fn u32_pad(&mut self, u: u32, len: usize) -> Result<(), ()> {
+        if len > self.idx {
             return Err(());
         }
-        let buf = [pad_char as u8; CAP];
-        let mut fbuf = Convert { buf, idx: CAP };
-        fbuf.format_u32(u)?;
-        fbuf.idx = CAP - len;
-        Ok(fbuf)
+        let next_idx = self.idx - len;
+        self.u32(u)?;
+        self.idx = next_idx;
+        Ok(())
     }
 
-    fn format_u32(&mut self, mut u: u32) -> Result<(), ()> {
+    /// Appends a u32 number to buffer
+    pub fn u32(&mut self, mut u: u32) -> Result<(), ()> {
         loop {
-            self.write_char((u % 10) as u8 + b'0')?;
+            self.write_u8((u % 10) as u8 + b'0')?;
             u /= 10;
 
             if u == 0 {
@@ -346,13 +347,13 @@ impl<const CAP: usize> Convert<CAP> {
     /// ```
     ///     use tfmt::Convert;
     ///
-    ///     let conv = Convert::<20>::i32(-4711).unwrap();
+    ///     let conv = Convert::<20>::from_i32(-4711).unwrap();
     ///     assert_eq!("-4711", conv.as_str());
     /// ```
-    pub fn i32(i: i32) -> Result<Self, ()> {
+    pub fn from_i32(i: i32) -> Result<Self, ()> {
         let buf = [b' '; CAP];
         let mut fbuf = Convert { buf, idx: CAP };
-        fbuf.format_i32(i)?;
+        fbuf.i32(i)?;
         Ok(fbuf)
     }
 
@@ -361,21 +362,22 @@ impl<const CAP: usize> Convert<CAP> {
     /// ```
     ///     use tfmt::Convert;
     ///
-    ///     let conv = Convert::<20>::i32_pad(-4711, 6, ' ').unwrap();
+    ///     let mut conv = Convert::<20>::new(b' ');
+    ///     conv.i32_pad(-4711, 6).unwrap();
     ///     assert_eq!(" -4711", conv.as_str());
     /// ```
-    pub fn i32_pad(i: i32, len: usize, pad_char: char) -> Result<Self, ()> {
-        if pad_char as u32 >= 0x80 || len > CAP {
+    pub fn i32_pad(&mut self, i: i32, len: usize) -> Result<(), ()> {
+        if len > CAP {
             return Err(());
         }
-        let buf = [pad_char as u8; CAP];
-        let mut fbuf = Convert { buf, idx: CAP };
-        fbuf.format_i32(i)?;
-        fbuf.idx = CAP - len;
-        Ok(fbuf)
+        let next_idx = self.idx - len;
+        self.i32(i)?;
+        self.idx = next_idx;
+        Ok(())
     }
 
-    fn format_i32(&mut self, i: i32) -> Result<(), ()> {
+    /// Appends a i32 number to buffer
+    pub fn i32(&mut self, i: i32) -> Result<(), ()> {
         let negative = i.is_negative();
         let u = if negative {
             match i.checked_abs() {
@@ -385,9 +387,9 @@ impl<const CAP: usize> Convert<CAP> {
         } else {
             i as u32
         };
-        self.format_u32(u)?;
+        self.u32(u)?;
         if negative {
-            self.write_char(b'-')?;
+            self.write_u8(b'-')?;
         }
         Ok(())
     }
