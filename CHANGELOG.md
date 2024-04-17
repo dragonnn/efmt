@@ -1,17 +1,24 @@
 # Change Log
 
-## Changed (Macros)
-- Separation of lib.rs into lib, parser, write_gen and debug_gen
-- Traits DisplayFormatted, DisplayPadded added
-- Internal traits DisplayFormat, Display revised
+# [v0.4.0] - 2024-04-17
 
-## Changed (Lib)
-- Add Float Formatting
-- Add Padding
-- Code reworked and restructured
-- Source code for size and cycle measurement added
+## Changed
+- macros and tfmt now have the same version and changelog as they are linked to each other
+- tests can now be executed with and without feature std
+- macros: separation of lib.rs into lib, parser, write_gen and debug_gen
+- internal traits DisplayFormat, Display revised
+- get rid of unitialised wherever possible - replace unitialised with Maybeuninit
+- Documentation improved, 
+
+## Added
+- traits DisplayFormatted and DisplayPadded
+- binary and octal formatting
+- float formatting
+- padding
+- source code and performance chart for size and cycle measurement
 
 ## [v0.3.0] - 2022-08-10
+- Below is the copy of ufmt changelog (macros)
 
 ## Changed
 - [breaking-change] Minimum Supported Rust Version (MSRV) guarantee has been removed
