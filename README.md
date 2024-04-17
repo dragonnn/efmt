@@ -1,9 +1,10 @@
 A tiny, fast and panic-free alternative to core::fmt
 
-The basis for the development of tfmt is [japaric's ufmt](https://github.com/japaric/ufmt). No 
-changes have been made to the original repository for some time. The author also clearly states 
-that the display of float numbers and padding is not the focus of the implementation. However, 
-these two points in particular can be important when using this crate. 
+The basis for the development of tfmt is [japaric's ufmt](https://github.com/japaric/ufmt). All 
+the main ideas and concepts come from there. However, the author makes it clear that the 
+representation of floating point numbers and padding is not the focus of the implementation. For 
+some projects, it is precisely these points that are important.
+
 
 ## Design Goals
 - Optimised for size and speed for small embedded systems

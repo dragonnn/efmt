@@ -6,7 +6,7 @@ use core::{slice, str};
 
 const HEX_BUF_LEN: usize = 35;
 
-macro_rules! hex {
+macro_rules! hex_oct_bin {
     ($utype: ty, $n:expr, $upper: expr, $prefix: expr, $div: expr, $len: expr) => {{
         let mut buf = [0_u8; HEX_BUF_LEN];
         let ptr = &buf.as_mut_ptr().cast::<u8>();
@@ -17,14 +17,14 @@ macro_rules! hex {
         loop {
             let val = (n % $div) as u8;
             let d = if val < 10 { b'0' + val } else { c + val - 10 };
-            // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is
-            // necessary because rust array accesses generate an undesired panicking branch.
 
             if i == 2 {
                 buf[HEX_BUF_LEN - 5..HEX_BUF_LEN].copy_from_slice(b" ovfl");
                 i = HEX_BUF_LEN - 5;
                 break;
             } else {
+                // SAFETY: Since i >= 0 and below CAP, this access is secure. This construct is
+                // necessary because rust array accesses generate an undesired panicking branch.
                 unsafe { ptr.add(i).write_volatile(d) }
             }
 
@@ -95,7 +95,7 @@ macro_rules! hex_trait_impl {
                 } else {
                     0
                 };
-                let s = hex!($u_type, *self as $u_type, cmd == 'X', pre_char, div, len);
+                let s = hex_oct_bin!($u_type, *self as $u_type, cmd == 'X', pre_char, div, len);
                 if len == 0 {
                     fmt.write_padded(s, pad_char, padding)
                 } else {
@@ -401,7 +401,7 @@ impl<T> uDebug for *const T {
     where
         W: uWrite + ?Sized,
     {
-        let s = hex!(u16, *self as u16, false, Some(b'x'), 16, 0);
+        let s = hex_oct_bin!(u16, *self as u16, false, Some(b'x'), 16, 0);
         f.write_str(s)
     }
 
@@ -410,7 +410,7 @@ impl<T> uDebug for *const T {
     where
         W: uWrite + ?Sized,
     {
-        let s = hex!(u32, *self as u32, false, Some(b'x'), 16, 0);
+        let s = hex_oct_bin!(u32, *self as u32, false, Some(b'x'), 16, 0);
         f.write_str(s)
     }
 
@@ -419,7 +419,7 @@ impl<T> uDebug for *const T {
     where
         W: uWrite + ?Sized,
     {
-        let s = hex!(u64, *self as u64, false, Some(b'x'), 16, 0);
+        let s = hex_oct_bin!(u64, *self as u64, false, Some(b'x'), 16, 0);
         f.write_str(s)
     }
 }
