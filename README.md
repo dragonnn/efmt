@@ -171,12 +171,12 @@ directory.
 | u32                  |   fmt |          584 |          166 |          428 |
 | u32 padded           |  tfmt |          496 |          284 |          406 |
 | u32 padded           |   fmt |          940 |          770 |         1019 |
-| u32-hex              |  tfmt |          128 |          125 |          237 |
+| u32-hex              |  tfmt |           96 |           61 |          229 |
 | u32-hex              |   fmt |          948 |          422 |          563 |
 | u8 u16 u32           |  tfmt |          708 |          118 |          512 |
 | u8 u16 u32           |   fmt |          940 |          770 |         1019 |
 | f32                  |  tfmt |          720 |          189 |          196 |
-| f32                  |   fmt |        23420 |         1049 |         4799 |
+| f32                  |   fmt |        23420 |          604 |         4827 |
 
 The contents of the table are shown graphically below:
 

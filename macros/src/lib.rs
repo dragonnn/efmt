@@ -1,4 +1,4 @@
-//! `tfmt` macros
+#![doc = include_str!("../README.md")]
 
 extern crate proc_macro;
 
@@ -13,11 +13,13 @@ use debug_gen::debug_gen;
 
 use proc_macro::TokenStream;
 
+/// Parse format string and generate code
 #[proc_macro]
 pub fn uwrite(input: TokenStream) -> TokenStream {
     write(input, false)
 }
 
+/// Like uwrite, additionally generates a line feed
 #[proc_macro]
 pub fn uwriteln(input: TokenStream) -> TokenStream {
     write(input, true)

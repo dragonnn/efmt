@@ -397,19 +397,19 @@ pub trait uDisplayPadded {
 ///         fmt.write_padded(conv.as_str(), pad_char, padding)
 ///     }
 /// }
-
+/// 
 /// let lat_berlin = Coord(0.9180516165333352);
 /// let lon_berlin = Coord(0.23304198843966833);
-
-/// /// format for coord is dddmm
+/// 
+/// // format for coord is dddmm
 /// let s = uformat!(100, "{:N0},{:E0}", lat_berlin, lon_berlin).unwrap();
 /// assert_eq!("5236,N,1321,E", s.as_str());
-
-/// /// format for coord is dddmm.mmm
+/// 
+/// // format for coord is dddmm.mmm
 /// let s = uformat!(100, "{:N3},{:E3}", lat_berlin, lon_berlin).unwrap();
 /// assert_eq!("5236.029,N,1321.139,E", s.as_str());
-
-/// /// format for coord is dddmm.mmmmmm
+/// 
+/// // format for coord is dddmm.mmmmmm
 /// let s = uformat!(100, "{:013N6},{:014E6}", lat_berlin, lon_berlin).unwrap();
 /// assert_eq!("5236.028980,N,01321.139343,E", s.as_str());
 /// ```
@@ -432,10 +432,21 @@ pub trait uDisplayFormatted {
 /// Converts numerical data types to &str
 ///
 /// Convert contains a little public toolbox to convert numerical data to strings. So You can
-/// integrate your own data types easily and efficiently.
-///
-/// You will only need this component eventually if you implement yourself the [uDisplay],
-/// [uDisplayPadded] or the [uDisplayFormatted] trait of this crate.
+/// integrate your own data types easily and efficiently. You will only need this component 
+/// eventually if you implement yourself the [uDebug], [uDisplay], [uDisplayPadded] or the 
+/// [uDisplayFormatted] trait of this crate.
+/// 
+/// This crate is used in the following steps:
+/// 1. generate an instance
+/// 2. add your characters, strings, numbers etc
+/// 3. repeat step 2 until you are finished
+/// 4. write the result with or without padding in the formatter
+/// 
+/// Note: The buffer is written from left to right. The data points that should appear on the 
+/// right must be added first.
+/// 
+/// Examples of the use of [Convert] can be found in the documentation for [uDisplayPadded] 
+/// and [uDisplayFormatted].
 pub struct Convert<const CAP: usize> {
     buf: [u8; CAP],
     idx: usize,
