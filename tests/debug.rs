@@ -1,6 +1,6 @@
 mod macros;
 
-use tfmt::{derive::uDebug, uDebug, uWrite, uformat, uwrite, Formatter};
+use efmt::{derive::uDebug, uDebug, uWrite, uformat, uwrite, Formatter};
 
 #[test]
 fn struct_() {

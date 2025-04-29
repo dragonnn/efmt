@@ -1,6 +1,6 @@
 A tiny, fast and panic-free alternative to core::fmt
 
-The basis for the development of tfmt is [japaric's ufmt](https://github.com/japaric/ufmt). All 
+The basis for the development of efmt is [japaric's ufmt](https://github.com/japaric/ufmt). All 
 the main ideas and concepts come from there. However, the author makes it clear that the 
 representation of floating point numbers and padding is not the focus of the implementation. For 
 some projects, it is precisely these points that are important.
@@ -25,7 +25,7 @@ some projects, it is precisely these points that are important.
 - [uformat] macro to simply generating of strings
 
 ## Restrictions
-`tfmt` offers significantly less functionality than `core::fmt`. For example:
+`efmt` offers significantly less functionality than `core::fmt`. For example:
 - No named arguments
 - No exponential representation of float numbers
 - Restricted number range of float numbers (see `tests/float.rs`)
@@ -38,7 +38,7 @@ some projects, it is precisely these points that are important.
 ### Format Standard Rust Types
 
 ```rust
-use tfmt::uformat;
+use efmt::uformat;
 
 assert_eq!(
     uformat!(100, "The answer to {} is {}", "everything", 42).unwrap().as_str(),
@@ -74,7 +74,7 @@ assert_eq!("c       ", uformat!(100, "{:<8}", 'c').unwrap().as_str());
 ### Using Derive uDebug
 
 ```rust
-use tfmt::{uformat, derive::uDebug};
+use efmt::{uformat, derive::uDebug};
 
 #[derive(uDebug)]
 struct S1Struct {
@@ -120,7 +120,7 @@ assert_eq!(
 ### Format Your own Structures
 
 ```rust
-use tfmt::{uformat, uDisplayPadded, uWrite, Formatter, Padding};
+use efmt::{uformat, uDisplayPadded, uWrite, Formatter, Padding};
 
 struct EmailAddress {
     fname: &'static str,
@@ -156,9 +156,9 @@ assert_eq!(
 ### Performance
 
 The use of micro-benchmarks is usually problematic. Nevertheless, the trends can be recognised 
-very well. The following table shows a comparison of `tfmt` with `core::fmt` using a few examples. 
-tfmt is significantly smaller and also much faster than `core::fmt`. Another difference is that
-`tfmt` does not contain a panicking branch. This can be an important difference for embedded 
+very well. The following table shows a comparison of `efmt` with `core::fmt` using a few examples. 
+efmt is significantly smaller and also much faster than `core::fmt`. Another difference is that
+`efmt` does not contain a panicking branch. This can be an important difference for embedded 
 systems. The high memory requirement of `core::fmt` in connection with floats is astonishing. The 
 strong fluctuations in the required cycles are also surprising.
 
@@ -167,20 +167,20 @@ directory.
 
 | Name                 | Crate |         Size |   Cycles_min |   Cycles_max |
 |----------------------|-------|--------------|--------------|--------------|
-| u32                  |  tfmt |          408 |           34 |          277 |
+| u32                  |  efmt |          408 |           34 |          277 |
 | u32                  |   fmt |          584 |          166 |          428 |
-| u32 padded           |  tfmt |          496 |          284 |          406 |
+| u32 padded           |  efmt |          496 |          284 |          406 |
 | u32 padded           |   fmt |          940 |          770 |         1019 |
-| u32-hex              |  tfmt |           96 |           61 |          229 |
+| u32-hex              |  efmt |           96 |           61 |          229 |
 | u32-hex              |   fmt |          948 |          422 |          563 |
-| u8 u16 u32           |  tfmt |          708 |          118 |          512 |
+| u8 u16 u32           |  efmt |          708 |          118 |          512 |
 | u8 u16 u32           |   fmt |          940 |          770 |         1019 |
-| f32                  |  tfmt |          720 |          189 |          196 |
+| f32                  |  efmt |          720 |          189 |          196 |
 | f32                  |   fmt |        23420 |          604 |         4827 |
 
 The contents of the table are shown graphically below:
 
-![Size comparisation](https://github.com/Simsys/tfmt/blob/main/tests/size/performance.png?raw=true)
+![Size comparisation](https://github.com/Simsys/efmt/blob/main/tests/size/performance.png?raw=true)
 
 ### Use of unsafe
 

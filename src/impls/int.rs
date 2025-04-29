@@ -76,7 +76,6 @@ udisplay_as_udebug!(u64);
 udisplay_as_udebug!(u128);
 udisplay_as_udebug!(usize);
 
-
 macro_rules! ixx {
     ($uxx:ty, $n:expr, $len:expr) => {{
         let mut buf = [88_u8; $len];
@@ -166,7 +165,6 @@ udisplay_as_udebug!(i64);
 udisplay_as_udebug!(i128);
 udisplay_as_udebug!(isize);
 
-
 const HEX_BUF_LEN: usize = 35;
 
 macro_rules! hex_oct_bin {
@@ -200,7 +198,6 @@ macro_rules! hex_oct_bin {
                     len -= 1;
                 }
             }
-
         }
         if let Some(c) = $prefix {
             i -= 1;
@@ -238,11 +235,7 @@ macro_rules! hex_trait_impl {
                     'b' => (b'b', 2),
                     _ => (b'x', 16), // 'x', 'X'
                 };
-                let pre_char = if prefix {
-                    Some(c)
-                } else {
-                    None
-                };
+                let pre_char = if prefix { Some(c) } else { None };
                 let len = if pad_char == '0' {
                     let len = match padding {
                         Padding::LeftAligned(l) => l,
@@ -334,13 +327,12 @@ impl<T> uDebug for *mut T {
     }
 }
 
-
 // Extend the Convert struct
 impl<const CAP: usize> Convert<CAP> {
     /// Converts a u32 number into a string
     ///
     /// ```
-    ///     use tfmt::Convert;
+    ///     use efmt::Convert;
     ///
     ///     let conv = Convert::<20>::from_u32(4711).unwrap();
     ///     assert_eq!("4711", conv.as_str());
@@ -355,7 +347,7 @@ impl<const CAP: usize> Convert<CAP> {
     /// Converts a u32 number into a padded string with the specified len
     ///
     /// ```
-    ///     use tfmt::Convert;
+    ///     use efmt::Convert;
     ///
     ///     let mut conv = Convert::<20>::new(b'0');
     ///     conv.u32_pad(4711, 6).unwrap();
@@ -387,7 +379,7 @@ impl<const CAP: usize> Convert<CAP> {
     /// Converts a i32 number into a string
     ///
     /// ```
-    ///     use tfmt::Convert;
+    ///     use efmt::Convert;
     ///
     ///     let conv = Convert::<20>::from_i32(-4711).unwrap();
     ///     assert_eq!("-4711", conv.as_str());
@@ -402,7 +394,7 @@ impl<const CAP: usize> Convert<CAP> {
     /// Converts a i32 number into a padded string with the specified len
     ///
     /// ```
-    ///     use tfmt::Convert;
+    ///     use efmt::Convert;
     ///
     ///     let mut conv = Convert::<20>::new(b' ');
     ///     conv.i32_pad(-4711, 6).unwrap();

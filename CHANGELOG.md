@@ -3,7 +3,7 @@
 # [v0.4.0] - 2024-04-17
 
 ## Changed
-- macros and tfmt now have the same version and changelog as they are linked to each other
+- macros and efmt now have the same version and changelog as they are linked to each other
 - tests can now be executed with and without feature std
 - macros: separation of lib.rs into lib, parser, write_gen and debug_gen
 - internal traits DisplayFormat, Display revised

@@ -111,13 +111,13 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
             match piece {
                 Piece::Debug(pretty) => {
                     exprs.push(if pretty {
-                        quote!(f.pretty(|f| tfmt::uDebug::fmt(#pat, f))?;)
+                        quote!(f.pretty(|f| efmt::uDebug::fmt(#pat, f))?;)
                     } else {
-                        quote!(tfmt::uDebug::fmt(#pat, f)?;)
+                        quote!(efmt::uDebug::fmt(#pat, f)?;)
                     });
                 }
                 Piece::Display => {
-                    exprs.push(quote!(tfmt::uDisplay::fmt(#pat, f)?;));
+                    exprs.push(quote!(efmt::uDisplay::fmt(#pat, f)?;));
                 }
                 Piece::Str(_) => unreachable!(),
                 Piece::Float {
@@ -127,7 +127,7 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
                     behind,
                 } => {
                     let alignment = get_alignment(alignment, pad_length);
-                    exprs.push(quote!(tfmt::uDisplayFloat::fmt_float(
+                    exprs.push(quote!(efmt::uDisplayFloat::fmt_float(
                         #pat, 
                         f,
                         #alignment,
@@ -144,7 +144,7 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
                     behind,
                 } => {
                     let alignment = get_alignment(alignment, pad_length);
-                    exprs.push(quote!(tfmt::uDisplayFormatted::fmt_formatted(
+                    exprs.push(quote!(efmt::uDisplayFormatted::fmt_formatted(
                         #pat, 
                         f,
                         #prefix,
@@ -162,7 +162,7 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
                     alignment,
                 } => {
                     let alignment = get_alignment(alignment, pad_length);
-                    exprs.push(quote!(tfmt::uDisplayHex::fmt_hex(
+                    exprs.push(quote!(efmt::uDisplayHex::fmt_hex(
                         #pat, 
                         f,
                         #prefix,
@@ -177,7 +177,7 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
                     alignment,
                 } => {
                     let alignment = get_alignment(alignment, pad_length);
-                    exprs.push(quote!(tfmt::uDisplayPadded::fmt_padded(
+                    exprs.push(quote!(efmt::uDisplayPadded::fmt_padded(
                         #pat, 
                         f,
                         #alignment,
@@ -190,7 +190,7 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
 
     quote!(match (#(#args),*) {
         (#(#pats),*) => {
-            use tfmt::UnstableDoAsFormatter as _;
+            use efmt::UnstableDoAsFormatter as _;
 
             (#formatter).do_as_formatter(|f| {
                 #(#exprs)*
@@ -203,9 +203,9 @@ pub fn write(input: TokenStream, newline: bool) -> TokenStream {
 
 fn get_alignment(alignment: Alignment, pad_length: usize) -> TokenStream2 {
     match alignment {
-        Alignment::Left => quote!(tfmt::Padding::LeftAligned(#pad_length)),
-        Alignment::Right => quote!(tfmt::Padding::RightAligned(#pad_length)),
-        Alignment::Center => quote!(tfmt::Padding::CenterAligned(#pad_length)),
-        Alignment::Usual => quote!(tfmt::Padding::Usual(#pad_length)),
+        Alignment::Left => quote!(efmt::Padding::LeftAligned(#pad_length)),
+        Alignment::Right => quote!(efmt::Padding::RightAligned(#pad_length)),
+        Alignment::Center => quote!(efmt::Padding::CenterAligned(#pad_length)),
+        Alignment::Usual => quote!(efmt::Padding::Usual(#pad_length)),
     }
 }

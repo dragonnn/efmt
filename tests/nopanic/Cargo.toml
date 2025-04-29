@@ -1,5 +1,8 @@
 [package]
-authors = ["Jorge Aparicio <jorge@japaric.io>", "Jorge Aparicio <jorge@japaric.io>", ]
+authors = [
+    "Jorge Aparicio <jorge@japaric.io>",
+    "Jorge Aparicio <jorge@japaric.io>",
+]
 edition = "2018"
 name = "common"
 publish = false
@@ -7,7 +10,7 @@ version = "0.0.0"
 
 [dependencies]
 panic-never = "0.1.0"
-tfmt = { path = "../.." }
+efmt = { path = "../.." }
 
 [profile.release]
 codegen-units = 1

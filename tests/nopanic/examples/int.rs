@@ -1,7 +1,7 @@
 #![no_main]
 #![no_std]
 
-use tfmt::uwrite;
+use efmt::uwrite;
 
 use common::W;
 

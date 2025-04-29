@@ -9,7 +9,7 @@ use cortex_m_rt::entry;
 use stm32f4xx_hal::pac::{CorePeripherals, DWT};
 
 #[allow(unused)]
-use tfmt;
+use efmt;
 #[allow(unused)]
 use core::{fmt, convert::Infallible, ptr, fmt::Write};
 
@@ -53,19 +53,19 @@ fn main() -> ! {
         let mut s = heapless::String::<100>::new();
         let before = DWT::cycle_count();
 
-        //tfmt::uwrite!(&mut s, "{}", u32_).unwrap();
+        //efmt::uwrite!(&mut s, "{}", u32_).unwrap();
         //core::write!(&mut s, "{}", u32_).unwrap();
 
-        //tfmt::uwrite!(&mut s, "{:^20}", u32_).unwrap();
+        //efmt::uwrite!(&mut s, "{:^20}", u32_).unwrap();
         //core::write!(&mut s, "{:^20}", u32_).unwrap();
 
-        //tfmt::uwrite!(&mut s, "{} {} {}", u32_ as u8, u32_ as u16, u32_).unwrap();
+        //efmt::uwrite!(&mut s, "{} {} {}", u32_ as u8, u32_ as u16, u32_).unwrap();
         core::write!(&mut s, "{} {} {}", u32_ as u8, u32_ as u16, u32_).unwrap();
 
-        //tfmt::uwrite!(&mut s, "{:#x}", u32_).unwrap();
+        //efmt::uwrite!(&mut s, "{:#x}", u32_).unwrap();
         //core::write!(&mut s, "{:#x}", u32_).unwrap();
 
-        //tfmt::uwrite!(&mut s, "{:5.3}", f32_).unwrap();
+        //efmt::uwrite!(&mut s, "{:5.3}", f32_).unwrap();
         //core::write!(&mut s, "{:5.3}", f32_).unwrap();
 
         let after = DWT::cycle_count();

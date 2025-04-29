@@ -2,7 +2,7 @@
 macro_rules! cmp {
     ($($tt:tt)*) => {
         assert_eq!(
-            tfmt::uformat!(500, $($tt)*).unwrap().as_str(),
+            efmt::uformat!(500, $($tt)*).unwrap().as_str(),
             format!($($tt)*).as_str(),
         )
     }
@@ -13,7 +13,7 @@ macro_rules! cmp {
 macro_rules! cmp_str {
     ($s: expr, $($tt:tt)*) => {
         assert_eq!(
-            tfmt::uformat!(500, $($tt)*).unwrap().as_str(),
+            efmt::uformat!(500, $($tt)*).unwrap().as_str(),
             $s,
         )
     }

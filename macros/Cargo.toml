@@ -4,12 +4,12 @@ authors = [
     "Winfried Simon <winfried.simon@gmail.com",
 ]
 categories = ["embedded", "no-std"]
-description = "`tfmt` macros"
+description = "`efmt` macros"
 edition = "2021"
 keywords = ["Debug", "Display", "Write", "format"]
 license = "MIT OR Apache-2.0"
 name = "efmt-macros"
-repository = "https://github.com/simsys/tfmt"
+repository = "https://github.com/simsys/efmt"
 version = "0.4.0"
 
 [lib]

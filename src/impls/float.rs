@@ -77,7 +77,7 @@ impl<const CAP: usize> Convert<CAP> {
     /// Converts a f32 number into a string with the specified precision
     ///
     /// ```
-    ///     use tfmt::Convert;
+    ///     use efmt::Convert;
     ///
     ///     let conv = Convert::<20>::from_f32(3.14159265359, 4).unwrap();
     ///     assert_eq!("3.1416", conv.as_str());
@@ -95,7 +95,7 @@ impl<const CAP: usize> Convert<CAP> {
     /// Converts a f64 number into a string with the specified precision
     ///
     /// ```
-    ///     use tfmt::Convert;
+    ///     use efmt::Convert;
     ///
     ///     let conv = Convert::<20>::from_f64(3.14159265359, 4).unwrap();
     ///     assert_eq!("3.1416", conv.as_str());
@@ -116,9 +116,9 @@ impl<const CAP: usize> Convert<CAP> {
     /// is aligned to the right.
     ///
     /// ```
-    ///     use tfmt::Convert;
+    ///     use efmt::Convert;
     ///
-    ///     let mut conv = Convert::<20>::new(b'0'); 
+    ///     let mut conv = Convert::<20>::new(b'0');
     ///     conv.f32_pad(3.14159265359, 7, 3).unwrap();
     ///     assert_eq!("003.142", conv.as_str());
     /// ```
@@ -138,9 +138,9 @@ impl<const CAP: usize> Convert<CAP> {
     /// is aligned to the right.
     ///
     /// ```
-    ///     use tfmt::Convert;
+    ///     use efmt::Convert;
     ///
-    ///     let mut conv = Convert::<20>::new(b'0'); 
+    ///     let mut conv = Convert::<20>::new(b'0');
     ///     conv.f64_pad(3.14159265359, 7, 3).unwrap();
     ///     assert_eq!("003.142", conv.as_str());
     /// ```
@@ -247,7 +247,7 @@ impl<const CAP: usize> Convert<CAP> {
             None
         } else {
             if decimal_places > self.idx {
-                return Err(())
+                return Err(());
             }
             Some(self.idx - decimal_places as usize)
         };

@@ -56,7 +56,7 @@ pub trait uWrite {
 /// is also required here to ensure compatibility of the code.
 ///
 /// ```
-/// use tfmt::uformat;
+/// use efmt::uformat;
 ///
 /// assert_eq!(
 ///     uformat!(100, "The answer to {} is {}", "everything", 42).unwrap().as_str(),
@@ -69,7 +69,7 @@ macro_rules! uformat {
     ($cap:expr, $($tt:tt)*) => {{
         let mut s = heapless::String::<$cap>::new();
         #[allow(unreachable_code)]
-        match tfmt::uwrite!(&mut s, $($tt)*) {
+        match efmt::uwrite!(&mut s, $($tt)*) {
             Ok(_) => Ok(s),
             Err(e) => Err(e),
         }
@@ -83,7 +83,7 @@ macro_rules! uformat {
     ($cap:expr, $($tt:tt)*) => {{
         let mut s = String::new();
         #[allow(unreachable_code)]
-        match tfmt::uwrite!(&mut s, $($tt)*) {
+        match efmt::uwrite!(&mut s, $($tt)*) {
             Ok(_) => Ok(s),
             Err(e) => Err(e),
         }
@@ -118,7 +118,7 @@ macro_rules! udisplay_as_udebug {
 /// perform any interpretation or dynamic dispatch.
 ///
 /// ```
-/// use tfmt::uwrite;
+/// use efmt::uwrite;
 ///
 /// let mut s = String::new();
 /// uwrite!(&mut s, "the {} is {}", "number", 42).unwrap();
@@ -299,7 +299,7 @@ pub enum Padding {
 /// See [uwrite] for details.
 ///
 /// ```
-/// use tfmt::{uformat, uDisplayPadded, Convert};
+/// use efmt::{uformat, uDisplayPadded, Convert};
 ///
 /// struct Time {
 ///     hour: u8,
@@ -310,12 +310,12 @@ pub enum Padding {
 /// impl uDisplayPadded for Time {
 ///     fn fmt_padded<W>(
 ///             &self,
-///             fmt: &mut tfmt::Formatter<'_, W>,
-///             padding: tfmt::Padding,
+///             fmt: &mut efmt::Formatter<'_, W>,
+///             padding: efmt::Padding,
 ///             pad_char: char,
 ///         ) -> Result<(), W::Error>
 ///         where
-///             W: tfmt::uWrite + ?Sized
+///             W: efmt::uWrite + ?Sized
 ///     {
 ///         let mut conv = Convert::<6>::new(b'0');
 ///         conv.u32_pad(self.sec as u32, 2).unwrap();
@@ -348,22 +348,22 @@ pub trait uDisplayPadded {
 ///
 /// ```
 /// use std::f64::consts::PI;
-/// use tfmt::{uDisplayFormatted, uformat, Convert};
+/// use efmt::{uDisplayFormatted, uformat, Convert};
 ///
 /// struct Coord(f64);
 ///
 /// impl uDisplayFormatted for Coord {
 ///     fn fmt_formatted<W>(
 ///         &self,
-///         fmt: &mut tfmt::Formatter<'_, W>,
+///         fmt: &mut efmt::Formatter<'_, W>,
 ///         _prefix: bool,
 ///         cmd: char,
-///         padding: tfmt::Padding,
+///         padding: efmt::Padding,
 ///         pad_char: char,
 ///         decimal_places: usize,
 ///     ) -> Result<(), W::Error>
 ///     where
-///         W: tfmt::uWrite + ?Sized,
+///         W: efmt::uWrite + ?Sized,
 ///     {
 ///         let (sign, rad) = match cmd {
 ///             'E' => {

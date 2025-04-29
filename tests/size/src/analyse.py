@@ -1,22 +1,22 @@
 MEASURES = [
     ('Name',                'Crate',        'Size',         'Cycles_min',       'Cycles_mx'),
     ('base',                '-',            8128,           1,                  1),
-    ('u32',                 'tfmt',         8536,           35,                 278),
+    ('u32',                 'efmt',         8536,           35,                 278),
     ('u32',                 'fmt',          8712,           167,                429),
-    ('u32 padded',          'tfmt',         8624,           285,                407),
+    ('u32 padded',          'efmt',         8624,           285,                407),
     ('u32 padded',          'fmt',          9068,           771,                1020),
-    ('u32-hex',             'tfmt',         8224,           62,                 230),
+    ('u32-hex',             'efmt',         8224,           62,                 230),
     ('u32-hex',             'fmt',          9076,           423,                564),
-    ('u8 u16 u32',          'tfmt',         8836,           119,                513),
+    ('u8 u16 u32',          'efmt',         8836,           119,                513),
     ('u8 u16 u32',          'fmt',          9068,           771,                1020),
-    ('f32',                 'tfmt',         8848,           190,                197),
+    ('f32',                 'efmt',         8848,           190,                197),
     ('f32',                 'fmt',          31548,          605,                4828),    
 ]
 
 names = []
-sizes = {'tfmt': [], 'fmt': []}
-min_cycles = {'tfmt': [], 'fmt': []}
-max_cycles = {'tfmt': [], 'fmt': []}
+sizes = {'efmt': [], 'fmt': []}
+min_cycles = {'efmt': [], 'fmt': []}
+max_cycles = {'efmt': [], 'fmt': []}
 
 
 base_size = MEASURES[1][2]
@@ -48,7 +48,7 @@ import numpy as np
 x = np.arange(len(names))  # the label locations
 width = 0.34  # the width of the bars
 multiplier = 0
-colors={'tfmt': 'tab:green', 'fmt': 'tab:orange'}
+colors={'efmt': 'tab:green', 'fmt': 'tab:orange'}
 
 fig, ax = plt.subplots(1, 2, figsize=(12.8, 4.2), dpi=100)
 
@@ -60,7 +60,7 @@ for attribute, min_cs in sizes.items():
     multiplier += 1
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
-ax[0].set_title("Flash Size for 'tfmt' and 'core::fmt'")
+ax[0].set_title("Flash Size for 'efmt' and 'core::fmt'")
 ax[0].title.set_size(15)
 ax[0].set_ylabel('Size (bytes)')
 ax[0].set_xticks(x + width - 0.17, names)
@@ -83,7 +83,7 @@ for attribute, min_cs in min_cycles.items():
     multiplier += 1
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
-ax[1].set_title("Cortex M4 Cycles for 'tfmt' and 'core::fmt'")
+ax[1].set_title("Cortex M4 Cycles for 'efmt' and 'core::fmt'")
 ax[1].title.set_size(15)
 ax[1].set_ylabel('Cycles')
 ax[1].set_xticks(x + width -0.17, names)
