@@ -85,6 +85,16 @@ impl uWrite for alloc::string::String {
         Ok(())
     }
 }
+
+impl uWrite for dyn core::fmt::Write {
+    type Error = ();
+
+    fn write_str(&mut self, s: &str) -> Result<(), Self::Error> {
+        self.write_str(s).map_err(|_| ())?;
+        Ok(())
+    }
+}
+
 // This trait is only intended for use within this crate
 #[doc(hidden)]
 #[allow(non_camel_case_types)]
