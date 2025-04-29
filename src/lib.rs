@@ -1,5 +1,7 @@
 #![doc = include_str!("../README.md")]
 #![cfg_attr(not(feature = "std"), no_std)]
+#[cfg(feature = "alloc")]
+extern crate alloc;
 
 mod helpers;
 mod impls;
@@ -295,16 +297,16 @@ pub enum Padding {
 /// Creating padded output string
 ///
 /// See [uwrite] for details.
-/// 
+///
 /// ```
 /// use tfmt::{uformat, uDisplayPadded, Convert};
-/// 
+///
 /// struct Time {
 ///     hour: u8,
 ///     min: u8,
 ///     sec: u8,
 /// }
-/// 
+///
 /// impl uDisplayPadded for Time {
 ///     fn fmt_padded<W>(
 ///             &self,
@@ -313,7 +315,7 @@ pub enum Padding {
 ///             pad_char: char,
 ///         ) -> Result<(), W::Error>
 ///         where
-///             W: tfmt::uWrite + ?Sized 
+///             W: tfmt::uWrite + ?Sized
 ///     {
 ///         let mut conv = Convert::<6>::new(b'0');
 ///         conv.u32_pad(self.sec as u32, 2).unwrap();
@@ -322,7 +324,7 @@ pub enum Padding {
 ///         fmt.write_padded(conv.as_str(), pad_char, padding)
 ///     }
 /// }
-/// 
+///
 /// let time = Time { hour: 3, min: 17, sec: 7 };
 /// let s = uformat!(100, "{:^10}", time).unwrap();
 /// assert_eq!("  031707  ", s.as_str());
@@ -343,7 +345,7 @@ pub trait uDisplayPadded {
 /// Creating formatted output string
 ///
 /// See [uwrite] for details
-/// 
+///
 /// ```
 /// use std::f64::consts::PI;
 /// use tfmt::{uDisplayFormatted, uformat, Convert};
@@ -397,18 +399,18 @@ pub trait uDisplayPadded {
 ///         fmt.write_padded(conv.as_str(), pad_char, padding)
 ///     }
 /// }
-/// 
+///
 /// let lat_berlin = Coord(0.9180516165333352);
 /// let lon_berlin = Coord(0.23304198843966833);
-/// 
+///
 /// // format for coord is dddmm
 /// let s = uformat!(100, "{:N0},{:E0}", lat_berlin, lon_berlin).unwrap();
 /// assert_eq!("5236,N,1321,E", s.as_str());
-/// 
+///
 /// // format for coord is dddmm.mmm
 /// let s = uformat!(100, "{:N3},{:E3}", lat_berlin, lon_berlin).unwrap();
 /// assert_eq!("5236.029,N,1321.139,E", s.as_str());
-/// 
+///
 /// // format for coord is dddmm.mmmmmm
 /// let s = uformat!(100, "{:013N6},{:014E6}", lat_berlin, lon_berlin).unwrap();
 /// assert_eq!("5236.028980,N,01321.139343,E", s.as_str());
@@ -432,20 +434,20 @@ pub trait uDisplayFormatted {
 /// Converts numerical data types to &str
 ///
 /// Convert contains a little public toolbox to convert numerical data to strings. So You can
-/// integrate your own data types easily and efficiently. You will only need this component 
-/// eventually if you implement yourself the [uDebug], [uDisplay], [uDisplayPadded] or the 
+/// integrate your own data types easily and efficiently. You will only need this component
+/// eventually if you implement yourself the [uDebug], [uDisplay], [uDisplayPadded] or the
 /// [uDisplayFormatted] trait of this crate.
-/// 
+///
 /// This crate is used in the following steps:
 /// 1. generate an instance
 /// 2. add your characters, strings, numbers etc
 /// 3. repeat step 2 until you are finished
 /// 4. write the result with or without padding in the formatter
-/// 
-/// Note: The buffer is written from left to right. The data points that should appear on the 
+///
+/// Note: The buffer is written from left to right. The data points that should appear on the
 /// right must be added first.
-/// 
-/// Examples of the use of [Convert] can be found in the documentation for [uDisplayPadded] 
+///
+/// Examples of the use of [Convert] can be found in the documentation for [uDisplayPadded]
 /// and [uDisplayFormatted].
 pub struct Convert<const CAP: usize> {
     buf: [u8; CAP],
@@ -455,7 +457,10 @@ pub struct Convert<const CAP: usize> {
 impl<const CAP: usize> Convert<CAP> {
     /// Creates a new Convert instance with buffer set to pad_char
     pub fn new(pad_char: u8) -> Convert<CAP> {
-        Convert { buf: [pad_char; CAP], idx: CAP }
+        Convert {
+            buf: [pad_char; CAP],
+            idx: CAP,
+        }
     }
 
     /// Returns a reference to the string contained in Convert

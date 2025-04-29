@@ -1,8 +1,5 @@
 use crate::{uWrite, Formatter, Padding};
 
-#[cfg(not(feature = "std"))]
-use heapless::String;
-
 // Implementation detail of the `uwrite*!` macros
 #[doc(hidden)]
 pub trait UnstableDoAsFormatter {
@@ -42,11 +39,29 @@ where
     }
 }
 
-#[cfg(not(feature = "std"))]
-impl<const N: usize> uWrite for String<N> {
+#[cfg(feature = "heapless07")]
+impl<const N: usize> uWrite for heapless07::String<N> {
     type Error = ();
 
     fn write_str(&mut self, s: &str) -> Result<(), ()> {
+        self.push_str(s)
+    }
+}
+
+#[cfg(feature = "heapless08")]
+impl<const N: usize> uWrite for heapless08::String<N> {
+    type Error = ();
+
+    fn write_str(&mut self, s: &str) -> Result<(), ()> {
+        self.push_str(s)
+    }
+}
+
+#[cfg(feature = "heapless09")]
+impl<const N: usize, L: heapless09::LenType> uWrite for heapless09::String<N, L> {
+    type Error = heapless09::CapacityError;
+
+    fn write_str(&mut self, s: &str) -> Result<(), heapless09::CapacityError> {
         self.push_str(s)
     }
 }
@@ -61,6 +76,15 @@ impl uWrite for String {
     }
 }
 
+#[cfg(feature = "alloc")]
+impl uWrite for alloc::string::String {
+    type Error = ();
+
+    fn write_str(&mut self, s: &str) -> Result<(), ()> {
+        self.push_str(s);
+        Ok(())
+    }
+}
 // This trait is only intended for use within this crate
 #[doc(hidden)]
 #[allow(non_camel_case_types)]
