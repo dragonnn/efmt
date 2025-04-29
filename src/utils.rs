@@ -48,6 +48,15 @@ impl<const N: usize> uWrite for heapless07::String<N> {
     }
 }
 
+#[cfg(feature = "heapless07")]
+impl<const N: usize> uWrite for heapless07::Vec<u8, N> {
+    type Error = ();
+
+    fn write_str(&mut self, s: &str) -> Result<(), ()> {
+        self.extend_from_slice(s.as_bytes())
+    }
+}
+
 #[cfg(feature = "heapless08")]
 impl<const N: usize> uWrite for heapless08::String<N> {
     type Error = ();
@@ -57,12 +66,30 @@ impl<const N: usize> uWrite for heapless08::String<N> {
     }
 }
 
+#[cfg(feature = "heapless08")]
+impl<const N: usize> uWrite for heapless08::Vec<u8, N> {
+    type Error = ();
+
+    fn write_str(&mut self, s: &str) -> Result<(), ()> {
+        self.extend_from_slice(s.as_bytes())
+    }
+}
+
 #[cfg(feature = "heapless09")]
 impl<const N: usize, L: heapless09::LenType> uWrite for heapless09::String<N, L> {
     type Error = heapless09::CapacityError;
 
     fn write_str(&mut self, s: &str) -> Result<(), heapless09::CapacityError> {
         self.push_str(s)
+    }
+}
+
+#[cfg(feature = "heapless09")]
+impl<const N: usize, L: heapless09::LenType> uWrite for heapless09::Vec<u8, N, L> {
+    type Error = heapless09::CapacityError;
+
+    fn write_str(&mut self, s: &str) -> Result<(), heapless09::CapacityError> {
+        self.extend_from_slice(s.as_bytes())
     }
 }
 
