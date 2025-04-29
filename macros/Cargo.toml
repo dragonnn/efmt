@@ -1,11 +1,14 @@
 [package]
-authors = ["Jorge Aparicio <jorge@japaric.io>", "Winfried Simon <winfried.simon@gmail.com"]
+authors = [
+    "Jorge Aparicio <jorge@japaric.io>",
+    "Winfried Simon <winfried.simon@gmail.com",
+]
 categories = ["embedded", "no-std"]
 description = "`tfmt` macros"
 edition = "2021"
 keywords = ["Debug", "Display", "Write", "format"]
 license = "MIT OR Apache-2.0"
-name = "tfmt-macros"
+name = "efmt-macros"
 repository = "https://github.com/simsys/tfmt"
 version = "0.4.0"
 

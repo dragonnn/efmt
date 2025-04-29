@@ -10,7 +10,7 @@ use core::{slice::from_raw_parts, str::from_utf8_unchecked};
 
 /// Derive macro
 pub mod derive {
-    pub use tfmt_macros::uDebug;
+    pub use efmt_macros::uDebug;
 }
 
 #[doc(hidden)]
@@ -155,12 +155,12 @@ macro_rules! udisplay_as_udebug {
 /// - [uDisplayFormatted] example: `examples/coords`
 ///
 #[cfg(not(doctest))] // only ok with features "std"
-pub use tfmt_macros::uwrite;
+pub use efmt_macros::uwrite;
 
 /// Write formatted data into a buffer, with a newline appended
 ///
 /// See [`uwrite!`](macro.uwrite.html) for more details
-pub use tfmt_macros::uwriteln;
+pub use efmt_macros::uwriteln;
 
 /// Configuration for formatting
 #[allow(non_camel_case_types)]
