@@ -170,3 +170,126 @@ where
         }
     }
 }
+
+#[cfg(feature = "heapless07")]
+impl<const N: usize> uDisplay for heapless07::String<N> {
+    #[inline(always)]
+    fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        f.write_str(self)
+    }
+}
+
+#[cfg(feature = "heapless07")]
+impl<const N: usize> uDebug for heapless07::String<N> {
+    #[inline(always)]
+    fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        <heapless07::String<N> as uDisplay>::fmt(self, f)
+    }
+}
+
+#[cfg(feature = "heapless07")]
+impl<const N: usize> uDisplayPadded for heapless07::String<N> {
+    fn fmt_padded<W>(
+        &self,
+        fmt: &mut Formatter<'_, W>,
+        padding: Padding,
+        pad_char: char,
+    ) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        let padding = match padding {
+            Padding::Usual(pad_length) => Padding::LeftAligned(pad_length),
+            _ => padding,
+        };
+        fmt.write_padded(&*self, pad_char, padding)
+    }
+}
+
+#[cfg(feature = "heapless08")]
+impl<const N: usize> uDisplay for heapless08::String<N> {
+    #[inline(always)]
+    fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        f.write_str(self)
+    }
+}
+
+#[cfg(feature = "heapless08")]
+impl<const N: usize> uDebug for heapless08::String<N> {
+    #[inline(always)]
+    fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        <heapless08::String<N> as uDisplay>::fmt(self, f)
+    }
+}
+
+#[cfg(feature = "heapless08")]
+impl<const N: usize> uDisplayPadded for heapless08::String<N> {
+    fn fmt_padded<W>(
+        &self,
+        fmt: &mut Formatter<'_, W>,
+        padding: Padding,
+        pad_char: char,
+    ) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        let padding = match padding {
+            Padding::Usual(pad_length) => Padding::LeftAligned(pad_length),
+            _ => padding,
+        };
+        fmt.write_padded(&*self, pad_char, padding)
+    }
+}
+
+#[cfg(feature = "heapless09")]
+impl<const N: usize, L: heapless09::LenType> uDisplay for heapless09::String<N, L> {
+    #[inline(always)]
+    fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        f.write_str(self)
+    }
+}
+
+#[cfg(feature = "heapless09")]
+impl<const N: usize, L: heapless09::LenType> uDebug for heapless09::String<N, L> {
+    #[inline(always)]
+    fn fmt<W>(&self, f: &mut Formatter<'_, W>) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        <heapless09::String<N, L> as uDisplay>::fmt(self, f)
+    }
+}
+
+#[cfg(feature = "heapless09")]
+impl<const N: usize, L: heapless09::LenType> uDisplayPadded for heapless09::String<N, L> {
+    fn fmt_padded<W>(
+        &self,
+        fmt: &mut Formatter<'_, W>,
+        padding: Padding,
+        pad_char: char,
+    ) -> Result<(), W::Error>
+    where
+        W: uWrite + ?Sized,
+    {
+        let padding = match padding {
+            Padding::Usual(pad_length) => Padding::LeftAligned(pad_length),
+            _ => padding,
+        };
+        fmt.write_padded(&*self, pad_char, padding)
+    }
+}
